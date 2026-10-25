@@ -1,0 +1,5 @@
+# Format: IP:PORT:USERNAME:PASSWORD  or  IP:PASSWORD (defaults to port 22, root)
+# One server per line. Lines starting with # are ignored.
+# Example:
+# 198.51.100.10:22:root:MySecretPassword123
+# 203.0.113.25:AnotherPassword456

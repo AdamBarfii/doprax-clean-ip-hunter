@@ -1,0 +1,19 @@
+{
+  "doprax_api_key": "YOUR_DOPRAX_API_KEY_HERE",
+  "iran_server": {
+    "host": "YOUR_IRAN_SERVER_IP",
+    "port": 22,
+    "username": "root",
+    "password": "YOUR_IRAN_SSH_PASSWORD",
+    "key_path": ""
+  },
+  "defaults": {
+    "batch_size": 3,
+    "provider": "vultr",
+    "plan": "VC2-1C-1GB",
+    "location": "DE, Frankfurt",
+    "os": "ubuntu_24_04",
+    "carrier": "auto"
+  },
+  "custom_servers": []
+}

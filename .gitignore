@@ -1,0 +1,25 @@
+# Sensitive local configuration & credentials
+config.json
+custom_servers.txt
+
+# Local scan outputs & server credentials
+clean_servers.json
+clean_servers.txt
+dirty_servers.json
+dirty_servers.txt
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+github_upload_ready/
+

@@ -1,0 +1,4297 @@
+[
+  {
+    "operationId": "api_v2_services_instances_create",
+    "method": "POST",
+    "endpoint": "/api/v2/services/instances/",
+    "description": "Create a new VM service instance from a plan (product_version_id) with either a standard OS install, SSH-key access, or restore-from-snapshot.",
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "fields": [
+        {
+          "name": "product_version_id required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "idempotency_key required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "name",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "description",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "metadata",
+          "required": "optional",
+          "type": "object",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "selections",
+          "required": "optional",
+          "type": "object",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "app_name",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "image",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_name",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_code",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_codes",
+          "required": "optional",
+          "type": "Array<string>",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_id",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_ids",
+          "required": "optional",
+          "type": "Array<string>",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "product_version_id required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "idempotency_key required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "name",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "description",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "metadata",
+          "required": "optional",
+          "type": "object",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "selections",
+          "required": "optional",
+          "type": "object",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "app_name",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "image",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_name",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_code",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_codes",
+          "required": "optional",
+          "type": "Array<string>",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_id",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_ids",
+          "required": "optional",
+          "type": "Array<string>",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "product_version_id required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "idempotency_key required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "name",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "description",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "metadata",
+          "required": "optional",
+          "type": "object",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "selections",
+          "required": "optional",
+          "type": "object",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "app_name",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "image",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_name",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_code",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_codes",
+          "required": "optional",
+          "type": "Array<string>",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_id",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_ids",
+          "required": "optional",
+          "type": "Array<string>",
+          "validation": "",
+          "description": ""
+        }
+      ],
+      "example": "{ \"product_version_id\": \"2489E9AD-2EE2-8E00-8EC9-32D5F69181C0\", \"idempotency_key\": \"example\", \"name\": \"example\", \"description\": \"example\", \"metadata\": { \"additionalProperty\": \"example\" }, \"selections\": { \"additionalProperty\": \"example\" }, \"app_name\": \"example\", \"image\": \"example\", \"container_name\": \"example\", \"container_code\": \"example\", \"container_codes\": [ \"example\" ], \"container_id\": \"example\", \"container_ids\": [ \"example\" ]}"
+    },
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "idempotent",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "operation_id required",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "service_id required",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "status required",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "action required",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "task_id",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "status_reason",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "created_at",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "started_at",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "completed_at",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "updated_at",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"idempotent\": true, \"operation_id\": \"2489E9AD-2EE2-8E00-8EC9-32D5F69181C0\", \"service_id\": \"2489E9AD-2EE2-8E00-8EC9-32D5F69181C0\", \"status\": \"example\", \"action\": \"example\", \"task_id\": \"example\", \"status_reason\": \"example\", \"created_at\": \"2026-04-15T12:00:00Z\", \"started_at\": \"2026-04-15T12:00:00Z\", \"completed_at\": \"2026-04-15T12:00:00Z\", \"updated_at\": \"2026-04-15T12:00:00Z\"}"
+      },
+      {
+        "statusCode": "400",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": false}"
+      }
+    ]
+  },
+  {
+    "operationId": "api_v2_services_instances_retrieve",
+    "method": "GET",
+    "endpoint": "/api/v2/services/instances/{service_id}/detail/",
+    "description": "Get full service/VM detail: status, plan, location, access info, and the lifecycle actions currently available.",
+    "parameters": [
+      {
+        "name": "service_id required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "meta",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "size",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "active_total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total_pages",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_next",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_prev",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_by",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_dir",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": \"example\", \"meta\": { \"page\": 1, \"size\": 1, \"total\": 1, \"active_total\": 1, \"total_pages\": 1, \"has_next\": true, \"has_prev\": true, \"sort_by\": \"example\", \"sort_dir\": \"example\" }, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"error\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      },
+      {
+        "statusCode": "404",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "meta",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "size",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "active_total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total_pages",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_next",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_prev",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_by",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_dir",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": \"example\", \"meta\": { \"page\": 1, \"size\": 1, \"total\": 1, \"active_total\": 1, \"total_pages\": 1, \"has_next\": true, \"has_prev\": true, \"sort_by\": \"example\", \"sort_dir\": \"example\" }, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"error\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      }
+    ]
+  },
+  {
+    "operationId": "api_v2_snapshots_create",
+    "method": "POST",
+    "endpoint": "/api/v2/snapshots/",
+    "description": "Create a new VM snapshot (account-wide v2 API).",
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "fields": [
+        {
+          "name": "vm_code required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "description required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "vm_code required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "description required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "vm_code required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "description required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        }
+      ],
+      "example": "{ \"vm_code\": \"2489E9AD-2EE2-8E00-8EC9-32D5F69181C0\", \"description\": \"example\"}"
+    },
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"data\": { \"additionalProperty\": \"example\" }, \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      },
+      {
+        "statusCode": "400",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }}"
+      },
+      {
+        "statusCode": "500",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }}"
+      }
+    ]
+  },
+  {
+    "operationId": "api_v2_snapshots_list",
+    "method": "GET",
+    "endpoint": "/api/v2/snapshots/",
+    "description": "List your account-wide VM snapshots — used to pick a snapshot_code for restore-from-snapshot when creating a VM.",
+    "parameters": [
+      {
+        "name": "vm_code",
+        "required": "optional",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"data\": { \"additionalProperty\": \"example\" }, \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      }
+    ]
+  },
+  {
+    "operationId": "api_v2_snapshots_retrieve",
+    "method": "GET",
+    "endpoint": "/api/v2/snapshots/{snapshot_code}/",
+    "description": "Get a single account-wide snapshot’s details.",
+    "parameters": [
+      {
+        "name": "snapshot_code required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"data\": { \"additionalProperty\": \"example\" }, \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      },
+      {
+        "statusCode": "400",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }}"
+      },
+      {
+        "statusCode": "500",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }}"
+      }
+    ]
+  },
+  {
+    "operationId": "v1_account_info_retrieve",
+    "method": "GET",
+    "endpoint": "/api/v1/account/info/",
+    "description": "Account profile and quota info, including numVmLimit — check this before creating a VM.",
+    "parameters": [],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data required",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "email required",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "location",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "userurl",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "avatar",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "githubLastConnectedDate",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "numVmLimit required",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "numVmsWithoutProvm required",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "ipChangeLimit required",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "ipChangeCountThisMonth required",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "numAppspaces required",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "numAppspaceLimit required",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "numSubdomains required",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "numSubdomainLimit required",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "trustLevel",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": { \"username\": \"example\", \"email\": \"example\", \"location\": \"example\", \"userurl\": \"example\", \"avatar\": \"example\", \"githubLastConnectedDate\": \"2026-04-15T12:00:00Z\", \"numVmLimit\": 1, \"numVmsWithoutProvm\": 1, \"ipChangeLimit\": 1, \"ipChangeCountThisMonth\": 1, \"numAppspaces\": 1, \"numAppspaceLimit\": 1, \"numSubdomains\": 1, \"numSubdomainLimit\": 1, \"trustLevel\": 1 }}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_catalogue_service_catalogue_retrieve",
+    "method": "GET",
+    "endpoint": "/api/v2/catalogue/service-catalogue/",
+    "description": "List available VM plans, providers, locations, and operating systems — used to pick a product_version_id and selections for a create request.",
+    "parameters": [
+      {
+        "name": "provider",
+        "required": "optional",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "service_type",
+        "required": "optional",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "Array<object>",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "key additional properties",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": [ { \"additionalProperty\": \"example\" } ]}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_finance_available_balance_retrieve",
+    "method": "GET",
+    "endpoint": "/api/v2/finance/available-balance/",
+    "description": "Check available account balance against an optional minimum required amount before creating or starting a VM.",
+    "parameters": [
+      {
+        "name": "action",
+        "required": "optional",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "min_required_cents",
+        "required": "optional",
+        "type": "integer",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "refresh",
+        "required": "optional",
+        "type": "boolean",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "refresh_alerts",
+        "required": "optional",
+        "type": "boolean",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data required",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "available_balance_cents required",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "accrued_cents required",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "recurring_cents required",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "usage_cents required",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "min_required_cents required",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "is_sufficient required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "default_min_required_cents required",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": { \"currency\": \"example\", \"available_balance_cents\": 1, \"accrued_cents\": 1, \"recurring_cents\": 1, \"usage_cents\": 1, \"min_required_cents\": 1, \"is_sufficient\": true, \"default_min_required_cents\": 1 }}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_finance_summary_retrieve",
+    "method": "GET",
+    "endpoint": "/api/v2/finance/summary/",
+    "description": "Billing summary, including runway_days — an estimate of how many days the current balance will last at the account’s burn rate.",
+    "parameters": [
+      {
+        "name": "refresh_alerts",
+        "required": "optional",
+        "type": "boolean",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data required",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "balance_cents",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "available_balance_cents",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "accrued_cents",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "recurring_cents",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "usage_cents",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "burn_rate_cents",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "runway_days",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "exhaustion_date",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "base_monthly_cents",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "base_daily_cents",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "cost_ratio",
+            "required": "optional",
+            "type": "number",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "reserved_cents",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pending_cents",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "credit_cents",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "promo_cents",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "bonus_cents",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": { \"currency\": \"example\", \"balance_cents\": 1, \"available_balance_cents\": 1, \"accrued_cents\": 1, \"recurring_cents\": 1, \"usage_cents\": 1, \"burn_rate_cents\": 1, \"runway_days\": 1, \"exhaustion_date\": \"example\", \"base_monthly_cents\": 1, \"base_daily_cents\": 1, \"cost_ratio\": 1, \"reserved_cents\": 1, \"pending_cents\": 1, \"credit_cents\": 1, \"promo_cents\": 1, \"bonus_cents\": 1 }}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_services_instances_detail_update",
+    "method": "PUT",
+    "endpoint": "/api/v2/services/instances/{service_id}/detail/",
+    "description": "Update the VM’s name and/or description. At least one field is required.",
+    "parameters": [
+      {
+        "name": "service_id required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      }
+    ],
+    "requestBody": {
+      "required": false,
+      "fields": [
+        {
+          "name": "name",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "description",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "name",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "description",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "name",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "description",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        }
+      ],
+      "example": "{ \"name\": \"example\", \"description\": \"example\"}"
+    },
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "meta",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "size",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "active_total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total_pages",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_next",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_prev",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_by",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_dir",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": \"example\", \"meta\": { \"page\": 1, \"size\": 1, \"total\": 1, \"active_total\": 1, \"total_pages\": 1, \"has_next\": true, \"has_prev\": true, \"sort_by\": \"example\", \"sort_dir\": \"example\" }, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"error\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      },
+      {
+        "statusCode": "400",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": false}"
+      },
+      {
+        "statusCode": "404",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "meta",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "size",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "active_total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total_pages",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_next",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_prev",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_by",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_dir",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": \"example\", \"meta\": { \"page\": 1, \"size\": 1, \"total\": 1, \"active_total\": 1, \"total_pages\": 1, \"has_next\": true, \"has_prev\": true, \"sort_by\": \"example\", \"sort_dir\": \"example\" }, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"error\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_services_instances_list_retrieve",
+    "method": "GET",
+    "endpoint": "/api/v2/services/instances/list/",
+    "description": "List service instances (VMs). Filter with service_type=vm and compare meta.active_total against numVmLimit to check quota before creating a VM.",
+    "parameters": [
+      {
+        "name": "date_from",
+        "required": "optional",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "date_to",
+        "required": "optional",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "page",
+        "required": "optional",
+        "type": "integer",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "page_size",
+        "required": "optional",
+        "type": "integer",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "provider",
+        "required": "optional",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "region",
+        "required": "optional",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "search",
+        "required": "optional",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "service_type",
+        "required": "optional",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "sort_by",
+        "required": "optional",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "sort_dir",
+        "required": "optional",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "status",
+        "required": "optional",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "meta",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "size",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "active_total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total_pages",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_next",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_prev",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_by",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_dir",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": \"example\", \"meta\": { \"page\": 1, \"size\": 1, \"total\": 1, \"active_total\": 1, \"total_pages\": 1, \"has_next\": true, \"has_prev\": true, \"sort_by\": \"example\", \"sort_dir\": \"example\" }, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"error\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_services_instances_operations_create",
+    "method": "POST",
+    "endpoint": "/api/v2/services/instances/{service_id}/operations/",
+    "description": "Run a lifecycle action on the VM (start, stop, reboot, delete, resize, snapshot, change_ip, rebuild, rescue) as a queued async operation.",
+    "parameters": [
+      {
+        "name": "service_id required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "fields": [
+        {
+          "name": "action required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "idempotency_key required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "ip_version",
+          "required": "optional",
+          "type": "integer",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_code",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_codes",
+          "required": "optional",
+          "type": "Array<string>",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_id",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_ids",
+          "required": "optional",
+          "type": "Array<string>",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "action required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "idempotency_key required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "ip_version",
+          "required": "optional",
+          "type": "integer",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_code",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_codes",
+          "required": "optional",
+          "type": "Array<string>",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_id",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_ids",
+          "required": "optional",
+          "type": "Array<string>",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "action required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "idempotency_key required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "ip_version",
+          "required": "optional",
+          "type": "integer",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_code",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_codes",
+          "required": "optional",
+          "type": "Array<string>",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_id",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "container_ids",
+          "required": "optional",
+          "type": "Array<string>",
+          "validation": "",
+          "description": ""
+        }
+      ],
+      "example": "{ \"action\": \"example\", \"idempotency_key\": \"example\", \"ip_version\": 1, \"container_code\": \"example\", \"container_codes\": [ \"example\" ], \"container_id\": \"example\", \"container_ids\": [ \"example\" ]}"
+    },
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "idempotent",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "operation_id required",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "service_id required",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "status required",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "action required",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "task_id",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "status_reason",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "created_at",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "started_at",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "completed_at",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "updated_at",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"idempotent\": true, \"operation_id\": \"2489E9AD-2EE2-8E00-8EC9-32D5F69181C0\", \"service_id\": \"2489E9AD-2EE2-8E00-8EC9-32D5F69181C0\", \"status\": \"example\", \"action\": \"example\", \"task_id\": \"example\", \"status_reason\": \"example\", \"created_at\": \"2026-04-15T12:00:00Z\", \"started_at\": \"2026-04-15T12:00:00Z\", \"completed_at\": \"2026-04-15T12:00:00Z\", \"updated_at\": \"2026-04-15T12:00:00Z\"}"
+      },
+      {
+        "statusCode": "400",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": false}"
+      },
+      {
+        "statusCode": "409",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": false}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_services_instances_operations_retrieve",
+    "method": "GET",
+    "endpoint": "/api/v2/services/instances/{service_id}/operations/",
+    "description": "List recent operations (activity log) for this VM; optional status filter.",
+    "parameters": [
+      {
+        "name": "service_id required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      },
+      {
+        "name": "limit",
+        "required": "optional",
+        "type": "integer",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "page_size",
+        "required": "optional",
+        "type": "integer",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      },
+      {
+        "name": "status",
+        "required": "optional",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "query"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "meta",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "size",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "active_total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total_pages",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_next",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_prev",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_by",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_dir",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": \"example\", \"meta\": { \"page\": 1, \"size\": 1, \"total\": 1, \"active_total\": 1, \"total_pages\": 1, \"has_next\": true, \"has_prev\": true, \"sort_by\": \"example\", \"sort_dir\": \"example\" }, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"error\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_services_instances_resize_options_preview_create",
+    "method": "POST",
+    "endpoint": "/api/v2/services/instances/{service_id}/resize_options/{new_pv_id}/preview/",
+    "description": "Dry-run a resize to a target plan: preview billing delta and warnings before executing it via the resize lifecycle action.",
+    "parameters": [
+      {
+        "name": "new_pv_id required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      },
+      {
+        "name": "service_id required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "meta",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "size",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "active_total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total_pages",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_next",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_prev",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_by",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_dir",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": \"example\", \"meta\": { \"page\": 1, \"size\": 1, \"total\": 1, \"active_total\": 1, \"total_pages\": 1, \"has_next\": true, \"has_prev\": true, \"sort_by\": \"example\", \"sort_dir\": \"example\" }, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"error\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      },
+      {
+        "statusCode": "400",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": false}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_services_instances_resize_options_retrieve",
+    "method": "GET",
+    "endpoint": "/api/v2/services/instances/{service_id}/resize_options/",
+    "description": "List plans this VM can resize to (upgrade/downgrade), with pricing for each option.",
+    "parameters": [
+      {
+        "name": "service_id required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "meta",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "size",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "active_total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total_pages",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_next",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_prev",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_by",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_dir",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": \"example\", \"meta\": { \"page\": 1, \"size\": 1, \"total\": 1, \"active_total\": 1, \"total_pages\": 1, \"has_next\": true, \"has_prev\": true, \"sort_by\": \"example\", \"sort_dir\": \"example\" }, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"error\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_services_instances_snapshots_actions_restore_create",
+    "method": "POST",
+    "endpoint": "/api/v2/services/instances/{service_id}/snapshots/{snapshot_code}/actions/restore/",
+    "description": "Restore/overwrite the VM’s disk from a snapshot. Destructive to the current disk state; the snapshot must be ready/available and synced with the provider.",
+    "parameters": [
+      {
+        "name": "service_id required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      },
+      {
+        "name": "snapshot_code required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true}"
+      },
+      {
+        "statusCode": "400",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": false}"
+      },
+      {
+        "statusCode": "409",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": false}"
+      },
+      {
+        "statusCode": "500",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": false}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_services_instances_snapshots_create",
+    "method": "POST",
+    "endpoint": "/api/v2/services/instances/{service_id}/snapshots/",
+    "description": "Create a new snapshot of this VM (service-scoped); may incur a one-time fee per the plan’s snapshot price component.",
+    "parameters": [
+      {
+        "name": "service_id required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "fields": [
+        {
+          "name": "description required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "idempotency_key",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "description required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "idempotency_key",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "description required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "idempotency_key",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        }
+      ],
+      "example": "{ \"description\": \"example\", \"idempotency_key\": \"example\"}"
+    },
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "meta",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "size",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "active_total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total_pages",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_next",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_prev",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_by",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_dir",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": \"example\", \"meta\": { \"page\": 1, \"size\": 1, \"total\": 1, \"active_total\": 1, \"total_pages\": 1, \"has_next\": true, \"has_prev\": true, \"sort_by\": \"example\", \"sort_dir\": \"example\" }, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"error\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      },
+      {
+        "statusCode": "400",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": false}"
+      },
+      {
+        "statusCode": "409",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": false}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_services_instances_snapshots_destroy",
+    "method": "DELETE",
+    "endpoint": "/api/v2/services/instances/{service_id}/snapshots/{snapshot_code}/",
+    "description": "Delete a snapshot belonging to this VM’s service instance.",
+    "parameters": [
+      {
+        "name": "service_id required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      },
+      {
+        "name": "snapshot_code required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true}"
+      },
+      {
+        "statusCode": "400",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": false}"
+      },
+      {
+        "statusCode": "500",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": false}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_services_instances_snapshots_retrieve",
+    "method": "GET",
+    "endpoint": "/api/v2/services/instances/{service_id}/snapshots/",
+    "description": "List snapshots for this VM’s service instance.",
+    "parameters": [
+      {
+        "name": "service_id required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "meta",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "size",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "active_total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total_pages",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_next",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_prev",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_by",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_dir",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": \"example\", \"meta\": { \"page\": 1, \"size\": 1, \"total\": 1, \"active_total\": 1, \"total_pages\": 1, \"has_next\": true, \"has_prev\": true, \"sort_by\": \"example\", \"sort_dir\": \"example\" }, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"error\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      },
+      {
+        "statusCode": "400",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": false}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_services_operations_retrieve",
+    "method": "GET",
+    "endpoint": "/api/v2/services/operations/{operation_id}/",
+    "description": "Get the status of a single operation by its operation_id.",
+    "parameters": [
+      {
+        "name": "operation_id required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "idempotent",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "operation_id required",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "service_id required",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "status required",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "action required",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "task_id",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "status_reason",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "created_at",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "started_at",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "completed_at",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "updated_at",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"idempotent\": true, \"operation_id\": \"2489E9AD-2EE2-8E00-8EC9-32D5F69181C0\", \"service_id\": \"2489E9AD-2EE2-8E00-8EC9-32D5F69181C0\", \"status\": \"example\", \"action\": \"example\", \"task_id\": \"example\", \"status_reason\": \"example\", \"created_at\": \"2026-04-15T12:00:00Z\", \"started_at\": \"2026-04-15T12:00:00Z\", \"completed_at\": \"2026-04-15T12:00:00Z\", \"updated_at\": \"2026-04-15T12:00:00Z\"}"
+      },
+      {
+        "statusCode": "404",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "meta",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "size",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "active_total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total_pages",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_next",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_prev",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_by",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_dir",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": \"example\", \"meta\": { \"page\": 1, \"size\": 1, \"total\": 1, \"active_total\": 1, \"total_pages\": 1, \"has_next\": true, \"has_prev\": true, \"sort_by\": \"example\", \"sort_dir\": \"example\" }, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"error\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_services_snapshots_retrieve",
+    "method": "GET",
+    "endpoint": "/api/v2/services/snapshots/",
+    "description": "List snapshots across all of your account’s VMs, with serviceId when the snapshot is linked to a service instance.",
+    "parameters": [],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "meta",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "size",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "active_total",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "total_pages",
+            "required": "optional",
+            "type": "integer",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_next",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "has_prev",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_by",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "sort_dir",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "error",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"data\": \"example\", \"meta\": { \"page\": 1, \"size\": 1, \"total\": 1, \"active_total\": 1, \"total_pages\": 1, \"has_next\": true, \"has_prev\": true, \"sort_by\": \"example\", \"sort_dir\": \"example\" }, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"error\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_snapshots_destroy",
+    "method": "DELETE",
+    "endpoint": "/api/v2/snapshots/{snapshot_code}/",
+    "description": "Delete an account-wide snapshot (v2 API).",
+    "parameters": [
+      {
+        "name": "snapshot_code required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }}"
+      },
+      {
+        "statusCode": "400",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }}"
+      },
+      {
+        "statusCode": "500",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_ssh_keys_create",
+    "method": "POST",
+    "endpoint": "/api/v2/ssh-keys/",
+    "description": "Register a new SSH public key for key-based VM access.",
+    "parameters": [],
+    "requestBody": {
+      "required": true,
+      "fields": [
+        {
+          "name": "title required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "public_key required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "title required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "public_key required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "title required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        },
+        {
+          "name": "public_key required",
+          "required": "optional",
+          "type": "string",
+          "validation": "",
+          "description": ""
+        }
+      ],
+      "example": "{ \"title\": \"example\", \"public_key\": \"example\"}"
+    },
+    "responses": [
+      {
+        "statusCode": "201",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"data\": { \"additionalProperty\": \"example\" }}"
+      },
+      {
+        "statusCode": "400",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_ssh_keys_destroy",
+    "method": "DELETE",
+    "endpoint": "/api/v2/ssh-keys/{ssh_key_code}/",
+    "description": "Delete a registered SSH public key.",
+    "parameters": [
+      {
+        "name": "ssh_key_code required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }}"
+      },
+      {
+        "statusCode": "404",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_ssh_keys_retrieve",
+    "method": "GET",
+    "endpoint": "/api/v2/ssh-keys/",
+    "description": "List your registered SSH public keys.",
+    "parameters": [],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "Array<object>",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "key additional properties",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"data\": [ { \"additionalProperty\": \"example\" } ]}"
+      }
+    ]
+  },
+  {
+    "operationId": "v2_vms_actions_access_retrieve",
+    "method": "GET",
+    "endpoint": "/api/v2/vms/{vm_code}/actions/access/",
+    "description": "Provide access details (e.g. password) for a VM. Returns null for the password field when the VM was provisioned with SSH-key access instead.",
+    "parameters": [
+      {
+        "name": "vm_code required",
+        "required": "required",
+        "type": "string",
+        "validation": "",
+        "description": "",
+        "in": "path"
+      }
+    ],
+    "requestBody": null,
+    "responses": [
+      {
+        "statusCode": "200",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"data\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      },
+      {
+        "statusCode": "400",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"data\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      },
+      {
+        "statusCode": "500",
+        "fields": [
+          {
+            "name": "success required",
+            "required": "optional",
+            "type": "boolean",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "msg_text",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "data",
+            "required": "optional",
+            "type": "",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "pagination",
+            "required": "optional",
+            "type": "object",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "next",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          },
+          {
+            "name": "previous",
+            "required": "optional",
+            "type": "string",
+            "validation": "",
+            "description": ""
+          }
+        ],
+        "example": "{ \"success\": true, \"msg\": { \"msg_kind\": \"example\", \"msg_text\": \"example\" }, \"data\": \"example\", \"pagination\": { \"count\": 1, \"next\": \"example\", \"previous\": \"example\" }}"
+      }
+    ]
+  }
+]
