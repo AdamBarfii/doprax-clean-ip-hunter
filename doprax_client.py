@@ -8,13 +8,17 @@ Robust, production-ready client for VM provisioning, polling, and lifecycle oper
 import time
 import uuid
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from typing import Dict, Any, List, Optional, Tuple
+
 
 class DopraxAPIError(Exception):
     def __init__(self, message: str, status_code: Optional[int] = None, response_body: Any = None):
         super().__init__(message)
         self.status_code = status_code
         self.response_body = response_body
+
 
 class DopraxClient:
     def __init__(self, api_key: str, base_url: str = "https://www.doprax.com"):
@@ -27,10 +31,22 @@ class DopraxClient:
             "Accept": "application/json"
         })
 
+        # Production connection pool + exponential backoff for transient 5xx/429 errors
+        retry_strategy = Retry(
+            total=3,
+            backoff_factor=1.5,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["GET", "POST"],
+            raise_on_status=False
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy, pool_connections=20, pool_maxsize=20)
+        self.session.mount("https://", adapter)
+        self.session.mount("http://", adapter)
+
     def _request(self, method: str, path: str, **kwargs) -> Any:
         url = f"{self.base_url}{path}"
         try:
-            resp = self.session.request(method, url, timeout=kwargs.pop("timeout", 30), **kwargs)
+            resp = self.session.request(method, url, timeout=kwargs.pop("timeout", 35), **kwargs)
         except requests.RequestException as e:
             raise DopraxAPIError(f"Network error connecting to Doprax API: {e}")
 
@@ -68,7 +84,8 @@ class DopraxClient:
             return res["data"]
         return []
 
-    def create_vm_v3(self, plan: str, location: str, name: str, os_name: str = "ubuntu_24_04", idempotency_key: Optional[str] = None) -> Dict[str, Any]:
+    def create_vm_v3(self, plan: str, location: str, name: str, os_name: str = "ubuntu_24_04",
+                     idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Create a VM via v3 API using friendly names."""
         payload = {
             "service_type": "vm",
@@ -98,28 +115,45 @@ class DopraxClient:
     def delete_instance(self, service_id: str, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """
         Immediately terminate and delete a VM instance.
+        Handles Doprax's 10-second per-instance operation cooldown automatically.
         Stops billing immediately.
         """
+        if not service_id or str(service_id).startswith("cust-"):
+            return {"success": False, "skipped": True}
+
+        idem = idempotency_key or f"del-{int(time.time())}-{uuid.uuid4().hex[:6]}"
         payload = {
             "action": "delete",
-            "idempotency_key": idempotency_key or f"del-{int(time.time())}-{uuid.uuid4().hex[:6]}"
+            "idempotency_key": idem
         }
-        try:
-            return self._request("POST", f"/api/v2/services/instances/{service_id}/operations/", json=payload)
-        except DopraxAPIError as e:
-            # If already 404 or in deletion, consider handled
-            if e.status_code == 404:
-                return {"success": True, "already_deleted": True}
-            raise
+        for attempt in range(3):
+            try:
+                return self._request("POST", f"/api/v2/services/instances/{service_id}/operations/", json=payload)
+            except DopraxAPIError as e:
+                if e.status_code == 404:
+                    return {"success": True, "already_deleted": True}
+                # Handle Doprax 10s per-instance operation cooldown
+                if e.status_code in (409, 429) or "cooldown" in str(e).lower():
+                    if attempt < 2:
+                        time.sleep(10.5)
+                        continue
+                raise
+        return {"success": False}
 
-    def poll_until_ready(self, service_id: str, max_wait_sec: int = 300, poll_interval: int = 6, status_callback=None) -> Tuple[str, str, str]:
+    def poll_until_ready(self, service_id: str, max_wait_sec: int = 300, poll_interval: int = 6,
+                         status_callback=None) -> Tuple[str, str, str]:
         """
         Polls until the VM reaches status 'running', status_reason 'vm_setup_complete', and has a public IP.
         Returns: (public_ipv4, vm_code, root_password)
         """
         start = time.time()
         while time.time() - start < max_wait_sec:
-            detail = self.get_instance_detail(service_id)
+            try:
+                detail = self.get_instance_detail(service_id)
+            except DopraxAPIError:
+                time.sleep(poll_interval)
+                continue
+
             service = detail.get("service", {})
             status = service.get("status", "unknown")
             status_reason = service.get("status_reason")
@@ -131,18 +165,25 @@ class DopraxClient:
             if status_callback:
                 status_callback(status=status_display, ip=public_ipv4 or "Waiting...", elapsed=int(time.time() - start))
 
+            if status in ("failed", "error", "terminated", "deleted"):
+                raise DopraxAPIError(f"VM {service_id} entered terminal state: {status} ({status_reason})")
+
             if status == "running" and public_ipv4 and vm_code:
                 # Ensure cloud-init has finished setting the root password
-                if status_reason == "vm_setup_complete" or (time.time() - start > 90):
-                    time.sleep(3)
-                    cred_info = self.get_vm_access(vm_code)
-                    temp_pass = cred_info.get("tempPass") or ""
+                if status_reason == "vm_setup_complete" or (time.time() - start > 75):
+                    time.sleep(2.5)
+                    temp_pass = ""
+                    for _ in range(3):
+                        try:
+                            cred_info = self.get_vm_access(vm_code)
+                            temp_pass = cred_info.get("tempPass") or ""
+                            if temp_pass:
+                                break
+                        except DopraxAPIError:
+                            pass
+                        time.sleep(3)
                     return public_ipv4, vm_code, temp_pass
-
-            if status in ["error", "failed"]:
-                reason = service.get("status_reason", "unknown error")
-                raise DopraxAPIError(f"VM provisioning failed with status: {status} ({reason})")
 
             time.sleep(poll_interval)
 
-        raise TimeoutError(f"VM {service_id} did not become ready within {max_wait_sec} seconds.")
+        raise DopraxAPIError(f"Timed out waiting for VM {service_id} to become ready after {max_wait_sec}s.")

@@ -236,7 +236,8 @@ class SSHManager:
 
     @classmethod
     def _single_protocol_probe(cls, kharej_client: paramiko.SSHClient, iran_client: paramiko.SSHClient,
-                               kharej_ip: str, test_port: int, status_cb=None) -> Dict[str, Any]:
+                               kharej_ip: str, test_port: int, ssh_port: int = 22,
+                               status_cb=None) -> Dict[str, Any]:
         """Runs a single round of bidirectional TCP/UDP benchmark from Iran."""
         # 1. Ensure firewall on Kharej accepts test port
         firewall_cmd = f"iptables -I INPUT -p tcp --dport {test_port} -j ACCEPT 2>/dev/null; iptables -I INPUT -p udp --dport {test_port} -j ACCEPT 2>/dev/null; ufw allow {test_port} 2>/dev/null || true"
@@ -313,17 +314,22 @@ import socket, time, json
 
 HOST = '{kharej_ip}'
 PORT = {test_port}
-res = {{'ssh_reachable': False, 'tcp_ok': False, 'udp_ok': False, 'tcp_down_kb': 0, 'tcp_up_kb': 0, 'udp_down_kb': 0, 'udp_up_kb': 0, 'udp_loss': 100, 'rtt_ms': 0, 'diag': []}}
+SSH_PORT = {ssh_port}
+res = {{
+    'ssh_reachable': False, 'tcp_ok': False, 'udp_ok': False,
+    'tcp_down_kb': 0.0, 'tcp_up_kb': 0.0, 'udp_down_kb': 0.0, 'udp_up_kb': 0.0,
+    'udp_loss': 100.0, 'udp_loss_pct': 100.0, 'rtt_ms': 0.0, 'latency_ms': 0.0, 'diag': []
+}}
 
-# 0. Check SSH Port 22 Reachability from Iran (Proves IP is routeable)
+# 0. Check SSH Reachability from Iran (Proves IP is routeable through GFW)
 try:
     s0 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s0.settimeout(3)
-    s0.connect((HOST, 22))
+    s0.connect((HOST, SSH_PORT))
     s0.close()
     res['ssh_reachable'] = True
 except Exception as e:
-    res['diag'].append(f'Port 22 SSH unreachable from Iran: {{type(e).__name__}}')
+    res['diag'].append(f'Port {{SSH_PORT}} SSH unreachable from Iran: {{type(e).__name__}}')
 
 # 1. TCP Latency & Ping
 try:
@@ -333,10 +339,11 @@ try:
     s.connect((HOST, PORT))
     s.sendall(b'PING\\n')
     data = s.recv(16)
-    rtt = (time.time() - t0) * 1000
+    rtt = round((time.time() - t0) * 1000, 1)
     s.close()
     if b'PONG' in data:
-        res['rtt_ms'] = round(rtt, 1)
+        res['rtt_ms'] = rtt
+        res['latency_ms'] = rtt
 except Exception as e:
     res['diag'].append(f'TCP Ping failed: {{type(e).__name__}}')
 
@@ -399,8 +406,9 @@ try:
         except socket.timeout: pass
     elapsed = max(0.001, time.time() - t0)
     s.close()
-    loss = ((packets - received) / packets) * 100
-    res['udp_loss'] = round(loss, 1)
+    loss = round(((packets - received) / packets) * 100, 1)
+    res['udp_loss'] = loss
+    res['udp_loss_pct'] = loss
     if received > 0:
         speed_kb = round((total_bytes / 1024) / elapsed, 1)
         res['udp_down_kb'] = speed_kb
@@ -418,13 +426,15 @@ print(json.dumps(res))
         res = {
             "tcp_ok": False, "udp_ok": False, "ssh_reachable": False,
             "tcp_down_kb": 0.0, "tcp_up_kb": 0.0, "udp_down_kb": 0.0, "udp_up_kb": 0.0,
-            "udp_loss_pct": 100.0, "latency_ms": 0.0, "diag": []
+            "udp_loss": 100.0, "udp_loss_pct": 100.0, "rtt_ms": 0.0, "latency_ms": 0.0, "diag": []
         }
         try:
             for line in out.splitlines():
                 if line.startswith("{") and "tcp_ok" in line:
                     parsed = json.loads(line)
                     res.update(parsed)
+                    res["udp_loss_pct"] = parsed.get("udp_loss_pct", parsed.get("udp_loss", 100.0))
+                    res["latency_ms"] = parsed.get("latency_ms", parsed.get("rtt_ms", 0.0))
                     break
         except Exception as e:
             res["diag"].append(f"Parse error: {e}")
@@ -433,32 +443,34 @@ print(json.dumps(res))
     @classmethod
     def run_protocol_verification(cls, kharej_client: paramiko.SSHClient, iran_client: paramiko.SSHClient,
                                   kharej_ip: str, token: str, test_port: int = 28880,
-                                  status_cb=None) -> Dict[str, Any]:
+                                  ssh_port: int = 22, status_cb=None) -> Dict[str, Any]:
         """
         Runs comprehensive TCP & UDP download/upload verification with an AUTOMATIC RETRY.
-        Ensures 100% certainty before any server is marked as dirty.
+        Ensures 100% certainty before any server is marked as dirty, and guarantees daemon cleanup.
         """
-        if status_cb:
-            status_cb(f"Benchmarking TCP/UDP throughput from Iran ({kharej_ip}) [Attempt 1/2]...")
+        try:
+            if status_cb:
+                status_cb(f"Benchmarking TCP/UDP throughput from Iran ({kharej_ip}) [Attempt 1/2]...")
 
-        probe1 = cls._single_protocol_probe(kharej_client, iran_client, kharej_ip, test_port, status_cb)
-        
-        # Clean criteria: TCP works both ways AND UDP loss is acceptable
-        is_clean1 = probe1["tcp_ok"] and probe1["udp_ok"] and (probe1["tcp_down_kb"] > 0) and (probe1["tcp_up_kb"] > 0)
+            probe1 = cls._single_protocol_probe(kharej_client, iran_client, kharej_ip, test_port, ssh_port=ssh_port, status_cb=status_cb)
 
-        if is_clean1:
-            probe1["wattun_alive"] = True
-            return probe1
+            # Clean criteria: TCP works both ways AND UDP loss is acceptable
+            is_clean1 = probe1["tcp_ok"] and probe1["udp_ok"] and (probe1["tcp_down_kb"] > 0) and (probe1["tcp_up_kb"] > 0)
 
-        # If attempt 1 failed, wait 2 seconds and RETRY to eliminate false positives
-        if status_cb:
-            status_cb(f"Double-checking {kharej_ip} [Attempt 2/2 to prevent false dirty]...")
-        time.sleep(2)
+            if is_clean1:
+                probe1["wattun_alive"] = True
+                return probe1
 
-        probe2 = cls._single_protocol_probe(kharej_client, iran_client, kharej_ip, test_port, status_cb)
-        probe2["wattun_alive"] = True
+            # If attempt 1 failed, wait 2 seconds and RETRY to eliminate false positives
+            if status_cb:
+                status_cb(f"Double-checking {kharej_ip} [Attempt 2/2 to prevent false dirty]...")
+            time.sleep(2)
 
-        # Clean up Kharej responder
-        cls.run_cmd(kharej_client, f"fuser -k {test_port}/tcp {test_port}/udp 2>/dev/null || true", timeout=5)
-
-        return probe2
+            probe2 = cls._single_protocol_probe(kharej_client, iran_client, kharej_ip, test_port, ssh_port=ssh_port, status_cb=status_cb)
+            probe2["wattun_alive"] = True
+            return probe2
+        finally:
+            try:
+                cls.run_cmd(kharej_client, f"fuser -k {test_port}/tcp {test_port}/udp 2>/dev/null || true", timeout=5)
+            except Exception:
+                pass

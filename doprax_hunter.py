@@ -12,8 +12,10 @@ import json
 import time
 import signal
 import atexit
+import threading
+import ipaddress
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, Any, List, Set, Optional
+from typing import Dict, Any, List, Set, Optional, Tuple
 
 from rich.console import Console
 from rich.table import Table
@@ -188,17 +190,23 @@ def worker_test_single_vm(target: Dict[str, Any], iran_cfg: Dict[str, Any], carr
     3. Deploys WatTunnel on Kharej VM.
     4. Runs bidirectional TCP/UDP benchmark against Iran server.
     """
-    ip = target.get("ip")
+    ip = (target.get("ip") or "").strip()
     s_id = target.get("id")
     pwd = target.get("password")
+    port = int(target.get("port", 22))
+    username = target.get("username", "root")
+    key_path = target.get("key_path")
     name = target.get("name", ip)
     datacenter = target.get("datacenter", "Doprax")
+    idx = int(target.get("idx", 1))
 
     result = {
-        "idx": target.get("idx", 1),
+        "idx": idx,
         "name": name,
         "id": s_id,
         "ip": ip,
+        "port": port,
+        "username": username,
         "datacenter": datacenter,
         "password": pwd,
         "token": "",
@@ -208,6 +216,15 @@ def worker_test_single_vm(target: Dict[str, Any], iran_cfg: Dict[str, Any], carr
         "pre_flagged": False,
         "details": {}
     }
+
+    # Verify VM actually booted and acquired a valid IP
+    try:
+        ipaddress.ip_address(ip)
+    except ValueError:
+        result["tcp_result"] = "Boot Failed"
+        result["udp_result"] = "No IP"
+        result["clean"] = False
+        return result
 
     # Pre-check: Is this IP already in our local Dirty Database?
     dirty_rec = DirtyIPManager.is_dirty(ip)
@@ -220,11 +237,11 @@ def worker_test_single_vm(target: Dict[str, Any], iran_cfg: Dict[str, Any], carr
         return result
 
     # 1. Wait for SSH server to be fully ready and sending protocol banners
-    if not SSHManager.wait_for_ssh_ready(ip, 22, timeout=90):
+    if not SSHManager.wait_for_ssh_ready(ip, port, timeout=90):
         result["tcp_result"] = "SSH Timeout"
         result["udp_result"] = "Skipped"
         result["clean"] = False
-        DirtyIPManager.record_dirty_ip(ip, provider=datacenter, reason="SSH Port 22 Unreachable or No Banner")
+        DirtyIPManager.record_dirty_ip(ip, provider=datacenter, reason=f"SSH Port {port} Unreachable or No Banner")
         return result
 
     # 2. SSH Connection with cloud-init retry loop
@@ -232,10 +249,10 @@ def worker_test_single_vm(target: Dict[str, Any], iran_cfg: Dict[str, Any], carr
     token = ""
     try:
         kharej_client = SSHManager.create_client_with_retry(
-            host=ip, port=22, username="root", password=pwd, max_wait=90, retry_interval=4
+            host=ip, port=port, username=username, password=pwd, key_path=key_path, max_wait=90, retry_interval=4
         )
         ok, token_res, _ = SSHManager.install_and_setup_wattunnel_kharej(
-            kharej_client, public_ip=ip, tunnel_name=f"tun{result['idx']}", carrier=carrier
+            kharej_client, public_ip=ip, tunnel_name=f"tun{idx}", carrier=carrier
         )
         if ok:
             token = token_res
@@ -249,9 +266,10 @@ def worker_test_single_vm(target: Dict[str, Any], iran_cfg: Dict[str, Any], carr
 
     # 3. Benchmark from Iran
     iran_client = None
+    test_port = 28880 + (idx % 50)
     try:
         # Small stagger to prevent threads from hammering Iran sshd simultaneously
-        time.sleep((result.get("idx", 1) % 4) * 0.4)
+        time.sleep((idx % 4) * 0.4)
         iran_client = SSHManager.create_client_with_retry(
             host=iran_cfg["host"],
             port=int(iran_cfg.get("port", 22)),
@@ -266,7 +284,8 @@ def worker_test_single_vm(target: Dict[str, Any], iran_cfg: Dict[str, Any], carr
             iran_client=iran_client,
             kharej_ip=ip,
             token=token,
-            test_port=28880
+            test_port=test_port,
+            ssh_port=port
         )
 
         tcp_ok = bench.get("tcp_ok", False)
@@ -292,7 +311,7 @@ def worker_test_single_vm(target: Dict[str, Any], iran_cfg: Dict[str, Any], carr
             DirtyIPManager.record_dirty_ip(ip, provider=datacenter, reason=reason, diag=diag, details=bench)
             console.print(f"[bold red]🚫 [{name} - {ip}] DIRTY/BLOCKED IP: TCP ok: {tcp_ok} | UDP ok: {udp_ok} | Loss: {u_loss}%[/bold red]")
             if not ssh_reach:
-                console.print(f"    [bold yellow]↳ GFW Blocked: Port 22 unreachable from Iran[/bold yellow]")
+                console.print(f"    [bold yellow]↳ GFW Blocked: Port {port} unreachable from Iran[/bold yellow]")
             elif diag:
                 console.print(f"    [dim]↳ Diag: {'; '.join(diag)}[/dim]")
 
@@ -316,7 +335,9 @@ def prompt_deletion_options(records: List[Dict[str, Any]], doprax: DopraxClient)
     1. Delete only dirty servers in this batch
     2. Choose specific servers to delete
     3. Keep all servers (do not delete anything)
+    4. Delete ALL servers in this batch
     """
+    global ACTIVE_TEMP_VMS
     dirty_records = [r for r in records if not r.get("clean", False)]
     clean_records = [r for r in records if r.get("clean", False)]
 
@@ -332,8 +353,13 @@ def prompt_deletion_options(records: List[Dict[str, Any]], doprax: DopraxClient)
     console.print("  [1] [bold red]🗑️  Delete ALL Dirty/Blocked servers in this batch[/bold red] (Stops billing for bad IPs)")
     console.print("  [2] [bold yellow]🎯 Select specific servers to delete[/bold yellow]")
     console.print("  [3] [bold green]💾 Keep all servers[/bold green] (Do not delete anything)")
+    console.print("  [4] [bold red]🔥 Delete ALL servers in this batch[/bold red]")
 
-    act = Prompt.ask("Choose action", choices=["1", "2", "3"], default="1" if dirty_records else "3")
+    act = Prompt.ask("Choose action", choices=["1", "2", "3", "4"], default="1" if dirty_records else "3")
+
+    # User has now made an explicit decision on this batch; release emergency cleanup tracking for these IDs
+    batch_ids = {r.get("id") for r in records}
+    ACTIVE_TEMP_VMS[:] = [t for t in ACTIVE_TEMP_VMS if t.get("id") not in batch_ids]
 
     to_delete = []
     if act == "1":
@@ -355,6 +381,8 @@ def prompt_deletion_options(records: List[Dict[str, Any]], doprax: DopraxClient)
     elif act == "3":
         console.print("[green]Keeping all servers running as requested.[/green]")
         return
+    elif act == "4":
+        to_delete = list(records)
 
     if to_delete:
         for r in to_delete:
@@ -894,8 +922,15 @@ def test_custom_servers(cfg: Dict[str, Any]):
 
     carrier = cfg.get("defaults", {}).get("carrier", "auto")
     targets = [{
-        "idx": i, "name": srv.get("name", srv["host"]), "id": f"cust-{i}",
-        "ip": srv["host"], "password": srv.get("password", ""), "datacenter": "Custom",
+        "idx": i,
+        "name": srv.get("name", srv["host"]),
+        "id": f"cust-{i}",
+        "ip": srv["host"],
+        "port": int(srv.get("port", 22)),
+        "username": srv.get("username", "root"),
+        "password": srv.get("password", ""),
+        "key_path": srv.get("key_path", ""),
+        "datacenter": "Custom",
         "clean": False
     } for i, srv in enumerate(targets_to_test, start=1)]
 
@@ -937,39 +972,53 @@ def test_custom_servers(cfg: Dict[str, Any]):
 #  View Storage Databases
 # ==============================================================================
 
-def save_clean_records(servers: List[Dict[str, Any]]):
-    """Saves verified clean servers to JSON and TXT logs."""
-    existing = []
-    if os.path.exists(CLEAN_SERVERS_FILE):
-        try:
-            with open(CLEAN_SERVERS_FILE, "r", encoding="utf-8") as f:
-                existing = json.load(f)
-        except Exception:
-            pass
-    for s in servers:
-        existing.append({
-            "service_id": s.get("id"),
-            "ip": s.get("ip"),
-            "datacenter": s.get("datacenter", "Doprax"),
-            "password": s.get("password"),
-            "ssh_cmd": f"ssh root@{s.get('ip')}",
-            "token": s.get("token", ""),
-            "tcp_down_kb": s.get("details", {}).get("tcp_down_kb", 0),
-            "tcp_up_kb": s.get("details", {}).get("tcp_up_kb", 0),
-            "udp_loss_pct": s.get("details", {}).get("udp_loss_pct", 0),
-            "latency_ms": s.get("details", {}).get("latency_ms", 0),
-            "saved_at": time.strftime("%Y-%m-%d %H:%M:%S")
-        })
-    with open(CLEAN_SERVERS_FILE, "w", encoding="utf-8") as f:
-        json.dump(existing, f, indent=2, ensure_ascii=False)
+_CLEAN_LOCK = threading.RLock()
 
-    with open(CLEAN_SERVERS_TXT, "a", encoding="utf-8") as f:
+
+def save_clean_records(servers: List[Dict[str, Any]]):
+    """Saves verified clean servers to JSON and TXT logs atomically and thread-safely."""
+    with _CLEAN_LOCK:
+        existing = []
+        if os.path.exists(CLEAN_SERVERS_FILE):
+            try:
+                with open(CLEAN_SERVERS_FILE, "r", encoding="utf-8") as f:
+                    existing = json.load(f)
+            except Exception:
+                pass
         for s in servers:
-            f.write(f"=== Clean Server ({s.get('datacenter')}): {s['ip']} ===\n")
-            f.write(f"ID: {s.get('id')}\n")
-            f.write(f"Root Password: {s.get('password')}\n")
-            f.write(f"SSH Command: ssh root@{s['ip']}\n")
-            f.write(f"WatTunnel Token: {s.get('token')}\n\n")
+            port = s.get("port", 22)
+            user = s.get("username", "root")
+            ssh_cmd = f"ssh {user}@{s.get('ip')}" if port == 22 else f"ssh -p {port} {user}@{s.get('ip')}"
+            existing.append({
+                "service_id": s.get("id"),
+                "ip": s.get("ip"),
+                "port": port,
+                "username": user,
+                "datacenter": s.get("datacenter", "Doprax"),
+                "password": s.get("password"),
+                "ssh_cmd": ssh_cmd,
+                "token": s.get("token", ""),
+                "tcp_down_kb": s.get("details", {}).get("tcp_down_kb", 0),
+                "tcp_up_kb": s.get("details", {}).get("tcp_up_kb", 0),
+                "udp_loss_pct": s.get("details", {}).get("udp_loss_pct", 0),
+                "latency_ms": s.get("details", {}).get("latency_ms", 0),
+                "saved_at": time.strftime("%Y-%m-%d %H:%M:%S")
+            })
+        tmp_file = f"{CLEAN_SERVERS_FILE}.tmp"
+        with open(tmp_file, "w", encoding="utf-8") as f:
+            json.dump(existing, f, indent=2, ensure_ascii=False)
+        os.replace(tmp_file, CLEAN_SERVERS_FILE)
+
+        with open(CLEAN_SERVERS_TXT, "a", encoding="utf-8") as f:
+            for s in servers:
+                port = s.get("port", 22)
+                user = s.get("username", "root")
+                ssh_cmd = f"ssh {user}@{s['ip']}" if port == 22 else f"ssh -p {port} {user}@{s['ip']}"
+                f.write(f"=== Clean Server ({s.get('datacenter')}): {s['ip']} ===\n")
+                f.write(f"ID: {s.get('id')}\n")
+                f.write(f"Root Password: {s.get('password')}\n")
+                f.write(f"SSH Command: {ssh_cmd}\n")
+                f.write(f"WatTunnel Token: {s.get('token')}\n\n")
 
 
 def view_clean_servers():
@@ -1001,7 +1050,7 @@ def view_clean_servers():
 
 
 def view_dirty_ips():
-    """Displays all local dirty/blocked IPs stored on PC."""
+    """Displays all local dirty/blocked IPs stored on PC with option to unflag."""
     records = DirtyIPManager.list_all()
     if not records:
         console.print("[yellow]No dirty IPs recorded in the local database yet.[/yellow]")
@@ -1012,13 +1061,27 @@ def view_dirty_ips():
     table.add_column("Blocked IP", style="bold red")
     table.add_column("Provider / Datacenter", style="cyan")
     table.add_column("Reason", style="yellow")
+    table.add_column("Hits", justify="center")
     table.add_column("Diagnosis / Error", style="dim")
     table.add_column("Flagged Date", style="dim")
 
     for i, r in enumerate(records, start=1):
         diag_str = "; ".join(r.get("diag", [])) if r.get("diag") else r.get("reason", "")
-        table.add_row(str(i), r.get("ip", ""), r.get("provider", "Doprax"), r.get("reason", ""), diag_str[:40], str(r.get("flagged_at", ""))[:16])
+        hits = str(r.get("hit_count", 1))
+        table.add_row(str(i), r.get("ip", ""), r.get("provider", "Doprax"), r.get("reason", ""), hits, diag_str[:40], str(r.get("flagged_at", ""))[:16])
     console.print(table)
+
+    if Confirm.ask("\nUnflag (remove) an IP from the dirty database so it can be re-tested?", default=False):
+        ip_or_num = Prompt.ask("Enter # or IP address to unflag").strip()
+        target_ip = ip_or_num
+        if ip_or_num.isdigit():
+            idx = int(ip_or_num)
+            if 1 <= idx <= len(records):
+                target_ip = records[idx - 1].get("ip", "")
+        if DirtyIPManager.remove_dirty_ip(target_ip):
+            console.print(f"[green]✓ Removed {target_ip} from local dirty IP database.[/green]")
+        else:
+            console.print(f"[yellow]Could not find {target_ip} in dirty IP database.[/yellow]")
 
 
 def list_and_manage_all_vms(doprax: DopraxClient):
