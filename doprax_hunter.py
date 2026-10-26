@@ -469,7 +469,7 @@ def select_verification_mode(cfg: Dict[str, Any]) -> Tuple[Optional[str], Dict[s
     [2] Standalone Agentless Mode (Without Iran Server — ~80-85% accuracy estimation)
     Returns (mode, iran_cfg) where mode is 'iran', 'agentless', or None if aborted.
     """
-    console.print("\n[bold cyan]Select Verification Mode (روش تست تمیز بودن سرور):[/bold cyan]")
+    console.print("\n[bold cyan]Select Verification Mode:[/bold cyan]")
     console.print("  [1] [bold green]🇮🇷 Via Dedicated Iran Server (★ Recommended — 100% Accuracy)[/bold green]")
     console.print("      [dim]Real 1MB bidirectional TCP Download/Upload & UDP Echo benchmark from your own Iran VPS.[/dim]")
     console.print("  [2] [bold yellow]🌐 Without Iran Server / Agentless Mode (~80%–85% Accuracy)[/bold yellow]")
@@ -478,12 +478,13 @@ def select_verification_mode(cfg: Dict[str, Any]) -> Tuple[Optional[str], Dict[s
     mode_choice = Prompt.ask("Choose verification mode", choices=["1", "2"], default="1")
     if mode_choice == "2":
         console.print(Panel(
-            "[bold yellow]⚠️  هشدار مهم درباره دقت روش بدون سرور ایران (Agentless Mode Notice)[/bold yellow]\n\n"
-            "• این روش [bold red]۱۰۰٪ قطعی نیست[/bold red] (دقت حدود ۸۰ تا ۸۵ درصد)؛ زیرا فقط باز بودن پورت از نودهای عمومی Check-Host\n"
-            "  و برگشت پکت‌های DNS از اپراتورهای ایران را می‌سنجد و امکان تست ترافیک واقعی تانل را ندارد.\n"
-            "• [bold green]پیشنهاد اکید:[/bold green] برای اطمینان ۱۰۰٪ از باز بودن دانلود/آپلود TCP و UDP روی تانل WatTunnel،\n"
-            "  همیشه استفاده از [bold cyan]یک سرور ایران اختصاصی (گزینه ۱)[/bold cyan] قویاً توصیه می‌شود.",
-            title="[bold red]Accuracy Disclaimer / سلب مسئولیت دقت[/bold red]",
+            "[bold yellow]⚠️  AGENTLESS MODE ACCURACY NOTICE[/bold yellow]\n\n"
+            "• This mode is [bold red]NOT 100% DEFINITIVE[/bold red] (estimated accuracy: ~80% - 85%).\n"
+            "  It probes public Check-Host nodes inside Iran and reverse ISP DNS returns, but cannot\n"
+            "  benchmark full bidirectional WatTunnel throughput on your specific home/mobile carrier.\n"
+            "• [bold green]STRONG RECOMMENDATION:[/bold green] For 100% certainty that TCP/UDP tunnel traffic passes\n"
+            "  unthrottled, using a [bold cyan]Dedicated Iran Server (Option 1)[/bold cyan] is strongly advised.",
+            title="[bold red]Accuracy Disclaimer[/bold red]",
             border_style="yellow",
             box=box.ROUNDED
         ))
@@ -876,8 +877,8 @@ def run_doprax_datacenter_hunter(doprax: DopraxClient, cfg: Dict[str, Any]):
     report_table.add_column("Result", style="bold")
 
     for r in results:
-        clean_lbl = "[bold green]CLEAN (~85% Est.)[/bold green]" if (r["clean"] and mode == "agentless") else "[bold green]CLEAN (تمیز)[/bold green]"
-        res_style = clean_lbl if r["clean"] else ("[yellow]FLAGGED DIRTY[/yellow]" if r.get("pre_flagged") else "[bold red]DIRTY (مسدود)[/bold red]")
+        clean_lbl = "[bold green]CLEAN (~85% Est.)[/bold green]" if (r["clean"] and mode == "agentless") else "[bold green]CLEAN[/bold green]"
+        res_style = clean_lbl if r["clean"] else ("[yellow]FLAGGED DIRTY[/yellow]" if r.get("pre_flagged") else "[bold red]DIRTY[/bold red]")
         report_table.add_row(str(r["idx"]), r["ip"], r.get("datacenter", "Doprax"), r["tcp_result"], r["udp_result"], res_style)
     console.print(report_table)
 
@@ -990,8 +991,8 @@ def test_existing_doprax_vms(doprax: DopraxClient, cfg: Dict[str, Any]):
     report_table.add_column("Result", style="bold")
 
     for r in results:
-        clean_lbl = "[bold green]CLEAN (~85% Est.)[/bold green]" if (r["clean"] and mode == "agentless") else "[bold green]CLEAN (تمیز)[/bold green]"
-        res_style = clean_lbl if r["clean"] else ("[yellow]FLAGGED DIRTY[/yellow]" if r.get("pre_flagged") else "[bold red]DIRTY (مسدود)[/bold red]")
+        clean_lbl = "[bold green]CLEAN (~85% Est.)[/bold green]" if (r["clean"] and mode == "agentless") else "[bold green]CLEAN[/bold green]"
+        res_style = clean_lbl if r["clean"] else ("[yellow]FLAGGED DIRTY[/yellow]" if r.get("pre_flagged") else "[bold red]DIRTY[/bold red]")
         report_table.add_row(str(r["idx"]), r["ip"], r["tcp_result"], r["udp_result"], res_style)
     console.print(report_table)
 
@@ -1128,8 +1129,8 @@ def test_custom_servers(cfg: Dict[str, Any]):
     report_table.add_column("Result", style="bold")
 
     for r in results:
-        clean_lbl = "[bold green]CLEAN (~85% Est.)[/bold green]" if (r["clean"] and mode == "agentless") else "[bold green]CLEAN (تمیز)[/bold green]"
-        res_style = clean_lbl if r["clean"] else ("[yellow]FLAGGED DIRTY[/yellow]" if r.get("pre_flagged") else "[bold red]DIRTY (مسدود)[/bold red]")
+        clean_lbl = "[bold green]CLEAN (~85% Est.)[/bold green]" if (r["clean"] and mode == "agentless") else "[bold green]CLEAN[/bold green]"
+        res_style = clean_lbl if r["clean"] else ("[yellow]FLAGGED DIRTY[/yellow]" if r.get("pre_flagged") else "[bold red]DIRTY[/bold red]")
         report_table.add_row(str(r["idx"]), r["ip"], r["tcp_result"], r["udp_result"], res_style)
     console.print(report_table)
 
