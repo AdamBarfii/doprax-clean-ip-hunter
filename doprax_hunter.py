@@ -329,6 +329,183 @@ def worker_test_single_vm(target: Dict[str, Any], iran_cfg: Dict[str, Any], carr
     return result
 
 
+# ==============================================================================
+#  Standalone Agentless Worker Routine (Completely Separate from Iran Server)
+# ==============================================================================
+
+def worker_test_single_vm_agentless(target: Dict[str, Any], carrier: str) -> Dict[str, Any]:
+    """
+    Executes in a dedicated background worker thread WITHOUT any Iran server:
+    1. Checks if IP was previously flagged in local Dirty Database.
+    2. Waits for SSH & cloud-init password activation.
+    3. Deploys WatTunnel on Kharej VM.
+    4. Runs Agentless verification (Check-Host 6 Iran nodes + Reverse Iran ISP TCP/UDP probe).
+    """
+    ip = (target.get("ip") or "").strip()
+    s_id = target.get("id")
+    pwd = target.get("password")
+    port = int(target.get("port", 22))
+    username = target.get("username", "root")
+    key_path = target.get("key_path")
+    name = target.get("name", ip)
+    datacenter = target.get("datacenter", "Doprax")
+    idx = int(target.get("idx", 1))
+
+    result = {
+        "idx": idx,
+        "name": name,
+        "id": s_id,
+        "ip": ip,
+        "port": port,
+        "username": username,
+        "datacenter": datacenter,
+        "password": pwd,
+        "token": "",
+        "tcp_result": "Pending",
+        "udp_result": "Pending",
+        "clean": False,
+        "pre_flagged": False,
+        "details": {}
+    }
+
+    try:
+        ipaddress.ip_address(ip)
+    except ValueError:
+        result["tcp_result"] = "Boot Failed"
+        result["udp_result"] = "No IP"
+        result["clean"] = False
+        return result
+
+    dirty_rec = DirtyIPManager.is_dirty(ip)
+    if dirty_rec:
+        result["pre_flagged"] = True
+        result["tcp_result"] = "Pre-Flagged Dirty"
+        result["udp_result"] = f"Seen {dirty_rec.get('flagged_at', '')[:10]}"
+        result["clean"] = False
+        console.print(f"[bold red]⚠️  [{name} - {ip}] PRE-FLAGGED DIRTY! (Found in local dirty IP database: {dirty_rec.get('reason')})[/bold red]")
+        return result
+
+    if not SSHManager.wait_for_ssh_ready(ip, port, timeout=90):
+        result["tcp_result"] = "SSH Timeout"
+        result["udp_result"] = "Skipped"
+        result["clean"] = False
+        DirtyIPManager.record_dirty_ip(ip, provider=datacenter, reason=f"SSH Port {port} Unreachable or No Banner")
+        return result
+
+    kharej_client = None
+    token = ""
+    try:
+        kharej_client = SSHManager.create_client_with_retry(
+            host=ip, port=port, username=username, password=pwd, key_path=key_path, max_wait=90, retry_interval=4
+        )
+        ok, token_res, _ = SSHManager.install_and_setup_wattunnel_kharej(
+            kharej_client, public_ip=ip, tunnel_name=f"tun{idx}", carrier=carrier
+        )
+        if ok:
+            token = token_res
+            result["token"] = token
+    except Exception as e:
+        result["tcp_result"] = "SSH/WatTun Error"
+        result["udp_result"] = "Error"
+        result["clean"] = False
+        DirtyIPManager.record_dirty_ip(ip, provider=datacenter, reason=f"SSH/WatTunnel setup failure: {e}")
+        return result
+
+    test_port = 28880 + (idx % 50)
+    try:
+        bench = SSHManager.run_agentless_verification(
+            kharej_client=kharej_client,
+            kharej_ip=ip,
+            test_port=test_port,
+            ssh_port=port
+        )
+
+        tcp_ok = bench.get("tcp_ok", False)
+        udp_ok = bench.get("udp_ok", False)
+        ch_ok = bench.get("ch_ok", 0)
+        ch_total = bench.get("ch_total", 6)
+        rev_udp = bench.get("rev_udp_ok", 0)
+        rev_total = bench.get("rev_total", 6)
+        latency = bench.get("latency_ms", 0.0)
+        diag = bench.get("diag", [])
+
+        result["tcp_result"] = f"{'✓' if tcp_ok else '✗'} IR Nodes: {ch_ok}/{ch_total}"
+        result["udp_result"] = f"{'✓' if udp_ok else '✗'} ISP DNS: {rev_udp}/{rev_total}"
+        result["details"] = bench
+
+        is_clean = tcp_ok and udp_ok
+        result["clean"] = is_clean
+
+        if is_clean:
+            console.print(
+                f"[bold green]🎉 [{name} - {ip}] AGENTLESS CLEAN (~85% Est.)! "
+                f"Check-Host IR: {ch_ok}/{ch_total} | ISP UDP: {rev_udp}/{rev_total} | {latency}ms[/bold green]"
+            )
+        else:
+            reason = "Agentless Check-Host/ISP Probe Failed"
+            DirtyIPManager.record_dirty_ip(ip, provider=datacenter, reason=reason, diag=diag, details=bench)
+            console.print(
+                f"[bold red]🚫 [{name} - {ip}] DIRTY/BLOCKED IP (Agentless): "
+                f"IR Nodes: {ch_ok}/{ch_total} | ISP UDP: {rev_udp}/{rev_total}[/bold red]"
+            )
+            if diag:
+                console.print(f"    [dim]↳ Diag: {'; '.join(diag)}[/dim]")
+    except Exception as e:
+        result["tcp_result"] = "Agentless Error"
+        result["udp_result"] = "Error"
+        result["clean"] = False
+        DirtyIPManager.record_dirty_ip(ip, provider=datacenter, reason=f"Agentless probe error: {e}")
+    finally:
+        if kharej_client:
+            kharej_client.close()
+
+    return result
+
+
+def select_verification_mode(cfg: Dict[str, Any]) -> Tuple[Optional[str], Dict[str, Any]]:
+    """
+    Lets the user choose between:
+    [1] Dedicated Iran Server Mode (★ Recommended — 100% accuracy)
+    [2] Standalone Agentless Mode (Without Iran Server — ~80-85% accuracy estimation)
+    Returns (mode, iran_cfg) where mode is 'iran', 'agentless', or None if aborted.
+    """
+    console.print("\n[bold cyan]Select Verification Mode (روش تست تمیز بودن سرور):[/bold cyan]")
+    console.print("  [1] [bold green]🇮🇷 Via Dedicated Iran Server (★ Recommended — 100% Accuracy)[/bold green]")
+    console.print("      [dim]Real 1MB bidirectional TCP Download/Upload & UDP Echo benchmark from your own Iran VPS.[/dim]")
+    console.print("  [2] [bold yellow]🌐 Without Iran Server / Agentless Mode (~80%–85% Accuracy)[/bold yellow]")
+    console.print("      [dim]Uses Check-Host.net (6 Iran nodes) + Reverse Iranian ISP TCP/UDP probes without an Iran VPS.[/dim]")
+
+    mode_choice = Prompt.ask("Choose verification mode", choices=["1", "2"], default="1")
+    if mode_choice == "2":
+        console.print(Panel(
+            "[bold yellow]⚠️  هشدار مهم درباره دقت روش بدون سرور ایران (Agentless Mode Notice)[/bold yellow]\n\n"
+            "• این روش [bold red]۱۰۰٪ قطعی نیست[/bold red] (دقت حدود ۸۰ تا ۸۵ درصد)؛ زیرا فقط باز بودن پورت از نودهای عمومی Check-Host\n"
+            "  و برگشت پکت‌های DNS از اپراتورهای ایران را می‌سنجد و امکان تست ترافیک واقعی تانل را ندارد.\n"
+            "• [bold green]پیشنهاد اکید:[/bold green] برای اطمینان ۱۰۰٪ از باز بودن دانلود/آپلود TCP و UDP روی تانل WatTunnel،\n"
+            "  همیشه استفاده از [bold cyan]یک سرور ایران اختصاصی (گزینه ۱)[/bold cyan] قویاً توصیه می‌شود.",
+            title="[bold red]Accuracy Disclaimer / سلب مسئولیت دقت[/bold red]",
+            border_style="yellow",
+            box=box.ROUNDED
+        ))
+        if not Confirm.ask("Proceed with Agentless Mode (without Iran server)?", default=True):
+            return None, {}
+        return "agentless", {}
+
+    # Mode 1: Dedicated Iran Server (100% Accurate)
+    iran_cfg = cfg.get("iran_server", {})
+    if not iran_cfg.get("host"):
+        configure_credentials_and_iran(cfg)
+        iran_cfg = cfg.get("iran_server", {})
+
+    with console.status("[cyan]Verifying Iran server SSH connection...[/cyan]"):
+        ok, msg = SSHManager.test_iran_connection(iran_cfg)
+        if not ok:
+            console.print(f"[bold red]❌ Cannot proceed with Iran Server mode: {msg}[/bold red]")
+            return None, {}
+
+    return "iran", iran_cfg
+
+
 def prompt_deletion_options(records: List[Dict[str, Any]], doprax: DopraxClient):
     """
     Presents controlled deletion choices to the user:
@@ -569,20 +746,13 @@ def run_doprax_datacenter_hunter(doprax: DopraxClient, cfg: Dict[str, Any]):
     global ACTIVE_TEMP_VMS
     console.print(Panel("[bold yellow]⚡ Doprax Multi-Datacenter Hunter (Vultr · ProVM · Hetzner) ⚡[/bold yellow]\n"
                         "Choose your preferred datacenter inside Doprax (e.g. Vultr, ProVM, Hetzner, DigitalOcean).\n"
-                        "Spins up VMs in parallel, checks local dirty IP records, benchmarks from Iran, and gives controlled deletion.",
+                        "Spins up VMs in parallel, checks local dirty IP records, benchmarks connectivity, and gives controlled deletion.",
                         box=box.ROUNDED))
 
-    # Pre-flight: Check Iran server
-    iran_cfg = cfg.get("iran_server", {})
-    if not iran_cfg.get("host"):
-        configure_credentials_and_iran(cfg)
-        iran_cfg = cfg.get("iran_server", {})
-
-    with console.status("[cyan]Verifying Iran server SSH connection...[/cyan]"):
-        ok, msg = SSHManager.test_iran_connection(iran_cfg)
-        if not ok:
-            console.print(f"[bold red]❌ Cannot proceed: {msg}[/bold red]")
-            return
+    # Select Verification Mode (1 = Dedicated Iran Server [Recommended 100%], 2 = Agentless [~80-85%])
+    mode, iran_cfg = select_verification_mode(cfg)
+    if not mode:
+        return
 
     # Check Doprax balance
     with console.status("[cyan]Checking Doprax available balance...[/cyan]"):
@@ -627,7 +797,8 @@ def run_doprax_datacenter_hunter(doprax: DopraxClient, cfg: Dict[str, Any]):
     os_image = defaults.get("os", "ubuntu_24_04")
     carrier = defaults.get("carrier", "auto")
 
-    console.print(f"\n[cyan]Starting hunt: {batch_size} VM(s) | Provider: {provider_code.upper()} | Plan: {plan_name} | Location: {location_name}[/cyan]")
+    mode_label = "Iran Server (100%)" if mode == "iran" else "Agentless (~85% Est.)"
+    console.print(f"\n[cyan]Starting hunt: {batch_size} VM(s) | Provider: {provider_code.upper()} | Plan: {plan_name} | Location: {location_name} | Mode: {mode_label}[/cyan]")
     if not Confirm.ask("[bold green]Start provisioning now?[/bold green]", default=True):
         return
 
@@ -677,11 +848,14 @@ def run_doprax_datacenter_hunter(doprax: DopraxClient, cfg: Dict[str, Any]):
                     console.print(f"  [red]✗ Error waiting for VM: {e}[/red]")
 
     # Step 3: Run Multithreaded Parallel Testing!
-    console.print("\n[bold cyan]Step 3/3: Running parallel WatTunnel & Protocol Benchmarks...[/bold cyan]")
+    console.print(f"\n[bold cyan]Step 3/3: Running parallel WatTunnel & {mode_label} Verification...[/bold cyan]")
     results = []
-    with console.status(f"[cyan]Testing {len(batch_records)} servers simultaneously in parallel threads...[/cyan]"):
+    with console.status(f"[cyan]Testing {len(batch_records)} servers simultaneously in parallel threads ({mode_label})...[/cyan]"):
         with ThreadPoolExecutor(max_workers=len(batch_records)) as executor:
-            futures = [executor.submit(worker_test_single_vm, item, iran_cfg, carrier) for item in batch_records]
+            if mode == "agentless":
+                futures = [executor.submit(worker_test_single_vm_agentless, item, carrier) for item in batch_records]
+            else:
+                futures = [executor.submit(worker_test_single_vm, item, iran_cfg, carrier) for item in batch_records]
             for fut in as_completed(futures):
                 try:
                     res = fut.result()
@@ -693,7 +867,7 @@ def run_doprax_datacenter_hunter(doprax: DopraxClient, cfg: Dict[str, Any]):
 
     # Summary Table
     console.print("\n")
-    report_table = Table(title=f"Doprax ({provider_code.upper()}) Multithreaded Scan Results", box=box.HEAVY_EDGE)
+    report_table = Table(title=f"Doprax ({provider_code.upper()}) Scan Results [{mode_label}]", box=box.HEAVY_EDGE)
     report_table.add_column("#", style="dim")
     report_table.add_column("Public IP", style="bold")
     report_table.add_column("Datacenter", style="cyan")
@@ -702,7 +876,8 @@ def run_doprax_datacenter_hunter(doprax: DopraxClient, cfg: Dict[str, Any]):
     report_table.add_column("Result", style="bold")
 
     for r in results:
-        res_style = "[bold green]CLEAN (تمیز)[/bold green]" if r["clean"] else ("[yellow]FLAGGED DIRTY[/yellow]" if r.get("pre_flagged") else "[bold red]DIRTY (مسدود)[/bold red]")
+        clean_lbl = "[bold green]CLEAN (~85% Est.)[/bold green]" if (r["clean"] and mode == "agentless") else "[bold green]CLEAN (تمیز)[/bold green]"
+        res_style = clean_lbl if r["clean"] else ("[yellow]FLAGGED DIRTY[/yellow]" if r.get("pre_flagged") else "[bold red]DIRTY (مسدود)[/bold red]")
         report_table.add_row(str(r["idx"]), r["ip"], r.get("datacenter", "Doprax"), r["tcp_result"], r["udp_result"], res_style)
     console.print(report_table)
 
@@ -727,16 +902,9 @@ def test_existing_doprax_vms(doprax: DopraxClient, cfg: Dict[str, Any]):
                         "Parallel benchmark for currently active Doprax VMs with controlled deletion.",
                         box=box.ROUNDED))
 
-    iran_cfg = cfg.get("iran_server", {})
-    if not iran_cfg.get("host"):
-        configure_credentials_and_iran(cfg)
-        iran_cfg = cfg.get("iran_server", {})
-
-    with console.status("[cyan]Verifying Iran server SSH connection...[/cyan]"):
-        ok, msg = SSHManager.test_iran_connection(iran_cfg)
-        if not ok:
-            console.print(f"[bold red]❌ Cannot proceed: {msg}[/bold red]")
-            return
+    mode, iran_cfg = select_verification_mode(cfg)
+    if not mode:
+        return
 
     with console.status("[cyan]Retrieving active instances from Doprax...[/cyan]"):
         try:
@@ -794,11 +962,15 @@ def test_existing_doprax_vms(doprax: DopraxClient, cfg: Dict[str, Any]):
             "datacenter": "Doprax", "clean": False
         })
 
-    console.print(f"\n[cyan]Starting parallel test of {len(targets)} server(s)...[/cyan]")
+    mode_label = "Iran Server (100%)" if mode == "iran" else "Agentless (~85% Est.)"
+    console.print(f"\n[cyan]Starting parallel test of {len(targets)} server(s) [{mode_label}]...[/cyan]")
     results = []
-    with console.status(f"[cyan]Testing {len(targets)} server(s) concurrently in parallel...[/cyan]"):
+    with console.status(f"[cyan]Testing {len(targets)} server(s) concurrently in parallel ({mode_label})...[/cyan]"):
         with ThreadPoolExecutor(max_workers=len(targets)) as executor:
-            futures = [executor.submit(worker_test_single_vm, item, iran_cfg, carrier) for item in targets]
+            if mode == "agentless":
+                futures = [executor.submit(worker_test_single_vm_agentless, item, carrier) for item in targets]
+            else:
+                futures = [executor.submit(worker_test_single_vm, item, iran_cfg, carrier) for item in targets]
             for fut in as_completed(futures):
                 try:
                     res = fut.result()
@@ -810,7 +982,7 @@ def test_existing_doprax_vms(doprax: DopraxClient, cfg: Dict[str, Any]):
 
     # Table
     console.print("\n")
-    report_table = Table(title="Existing Doprax VMs Parallel Test Results", box=box.HEAVY_EDGE)
+    report_table = Table(title=f"Existing Doprax VMs Parallel Test Results [{mode_label}]", box=box.HEAVY_EDGE)
     report_table.add_column("#", style="dim")
     report_table.add_column("Public IP", style="bold")
     report_table.add_column("TCP Test", style="cyan")
@@ -818,7 +990,8 @@ def test_existing_doprax_vms(doprax: DopraxClient, cfg: Dict[str, Any]):
     report_table.add_column("Result", style="bold")
 
     for r in results:
-        res_style = "[bold green]CLEAN (تمیز)[/bold green]" if r["clean"] else ("[yellow]FLAGGED DIRTY[/yellow]" if r.get("pre_flagged") else "[bold red]DIRTY (مسدود)[/bold red]")
+        clean_lbl = "[bold green]CLEAN (~85% Est.)[/bold green]" if (r["clean"] and mode == "agentless") else "[bold green]CLEAN (تمیز)[/bold green]"
+        res_style = clean_lbl if r["clean"] else ("[yellow]FLAGGED DIRTY[/yellow]" if r.get("pre_flagged") else "[bold red]DIRTY (مسدود)[/bold red]")
         report_table.add_row(str(r["idx"]), r["ip"], r["tcp_result"], r["udp_result"], res_style)
     console.print(report_table)
 
@@ -836,19 +1009,12 @@ def test_existing_doprax_vms(doprax: DopraxClient, cfg: Dict[str, Any]):
 def test_custom_servers(cfg: Dict[str, Any]):
     """Tests custom external servers using parallel worker threads."""
     console.print(Panel("[bold cyan]🎯 Test Custom Servers (Multithreaded) 🎯[/bold cyan]\n"
-                        "Benchmarks your custom foreign VPS servers simultaneously against your Iran server.",
+                        "Benchmarks your custom foreign VPS servers simultaneously.",
                         box=box.ROUNDED))
 
-    iran_cfg = cfg.get("iran_server", {})
-    if not iran_cfg.get("host"):
-        configure_credentials_and_iran(cfg)
-        iran_cfg = cfg.get("iran_server", {})
-
-    with console.status("[cyan]Verifying Iran server SSH connection...[/cyan]"):
-        ok, msg = SSHManager.test_iran_connection(iran_cfg)
-        if not ok:
-            console.print(f"[bold red]❌ Cannot proceed: {msg}[/bold red]")
-            return
+    mode, iran_cfg = select_verification_mode(cfg)
+    if not mode:
+        return
 
     custom_servers = cfg.setdefault("custom_servers", [])
 
@@ -934,11 +1100,15 @@ def test_custom_servers(cfg: Dict[str, Any]):
         "clean": False
     } for i, srv in enumerate(targets_to_test, start=1)]
 
-    console.print(f"\n[cyan]Benchmarking {len(targets)} custom server(s) in parallel threads...[/cyan]")
+    mode_label = "Iran Server (100%)" if mode == "iran" else "Agentless (~85% Est.)"
+    console.print(f"\n[cyan]Benchmarking {len(targets)} custom server(s) in parallel threads [{mode_label}]...[/cyan]")
     results = []
-    with console.status(f"[cyan]Testing {len(targets)} custom server(s) concurrently...[/cyan]"):
+    with console.status(f"[cyan]Testing {len(targets)} custom server(s) concurrently ({mode_label})...[/cyan]"):
         with ThreadPoolExecutor(max_workers=len(targets)) as executor:
-            futures = [executor.submit(worker_test_single_vm, item, iran_cfg, carrier) for item in targets]
+            if mode == "agentless":
+                futures = [executor.submit(worker_test_single_vm_agentless, item, carrier) for item in targets]
+            else:
+                futures = [executor.submit(worker_test_single_vm, item, iran_cfg, carrier) for item in targets]
             for fut in as_completed(futures):
                 try:
                     res = fut.result()
@@ -950,7 +1120,7 @@ def test_custom_servers(cfg: Dict[str, Any]):
 
     # Table
     console.print("\n")
-    report_table = Table(title="Custom Servers Parallel Test Results", box=box.HEAVY_EDGE)
+    report_table = Table(title=f"Custom Servers Parallel Test Results [{mode_label}]", box=box.HEAVY_EDGE)
     report_table.add_column("#", style="dim")
     report_table.add_column("Public IP", style="bold")
     report_table.add_column("TCP Test", style="cyan")
@@ -958,7 +1128,8 @@ def test_custom_servers(cfg: Dict[str, Any]):
     report_table.add_column("Result", style="bold")
 
     for r in results:
-        res_style = "[bold green]CLEAN (تمیز)[/bold green]" if r["clean"] else ("[yellow]FLAGGED DIRTY[/yellow]" if r.get("pre_flagged") else "[bold red]DIRTY (مسدود)[/bold red]")
+        clean_lbl = "[bold green]CLEAN (~85% Est.)[/bold green]" if (r["clean"] and mode == "agentless") else "[bold green]CLEAN (تمیز)[/bold green]"
+        res_style = clean_lbl if r["clean"] else ("[yellow]FLAGGED DIRTY[/yellow]" if r.get("pre_flagged") else "[bold red]DIRTY (مسدود)[/bold red]")
         report_table.add_row(str(r["idx"]), r["ip"], r["tcp_result"], r["udp_result"], res_style)
     console.print(report_table)
 

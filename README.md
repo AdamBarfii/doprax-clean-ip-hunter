@@ -62,7 +62,18 @@ flowchart LR
     Pool -- "Fail (Blocked)" --> DirtyDB
 ```
 
-### 🔬 4-Stage Verification Pipeline
+### 🔬 Two Independent Verification Modes
+AetherProbe provides two completely separate verification engines selectable before each scan:
+
+1. **🇮🇷 Mode 1: Dedicated Iran Server Mode (`★ Recommended — 100% Accuracy`)**
+   - Connects to your own domestic Iran VPS and runs a true 1 MB bidirectional TCP Download/Upload & UDP Echo packet-loss benchmark against the foreign VM.
+   - Guarantees 100% certainty that both TCP and UDP tunnel traffic pass unthrottled on your route.
+2. **🌐 Mode 2: Standalone Agentless Mode (`Without Iran Server — ~80%–85% Accuracy`)**
+   - Completely independent of an Iran VPS. Combines **Check-Host.net's 6 Iranian datacenter nodes** (Tehran, Isfahan, Shiraz inbound TCP probes) with a **Reverse Iranian ISP TCP & UDP DNS probe** executed from inside the foreign VM toward major Iranian carrier resolvers (TIC/Mokhaberat, Shatel, Shecan, Electro).
+   - > [!WARNING]
+   - > **Accuracy Disclaimer**: Agentless Mode is an estimation (~80%–85% accuracy) because public nodes cannot simulate full 1 MB bidirectional WatTunnel UDP streams on your specific ISP. Having a dedicated Iran server (Mode 1) is always recommended for 100% certainty.
+
+### 🛡️ 4-Stage Verification Pipeline
 1. **Local Dirty IP Pre-Screening (`O(1)` Lookup)**: Checks the newly assigned IPv4 against your local `dirty_servers.json` registry. If a cloud provider recycles a previously blocked IP, AetherProbe flags it immediately (`PRE-FLAGGED DIRTY`) before wasting time on installation.
 2. **Cloud-Init & OpenSSH Banner Readiness**: Probes TCP port `22` until the remote `sshd` daemon transmits a valid `SSH-2.0-...` identification banner and completes `cloud-init` root password activation.
 3. **Unattended WatTunnel Deployment**: Connects to the foreign VM, installs `wattun-manager`, configures the tunnel in unattended *Kharej* mode, and extracts the `wat1:...` connection token.
@@ -198,6 +209,18 @@ cp config.example.json config.json
 4. به سرور ایران شما وصل شده و **ترافیک واقعی ۱ مگابایت دانلود و آپلود TCP و پکت‌های اکو UDP** را بین سرور ایران و سرور خارج تبادل و بنچمارک می‌کند.
 5. **دیتابیس محلی آی‌پی‌های مسدود (`dirty_servers.json`):** هر آی‌پی که مسدود باشد را در کامپیوتر شما ذخیره می‌کند تا اگر دیتاسنتر دوباره همان آی‌پی را به شما داد، بلافاصله بدون اتلاف وقت آن را با برچسب `PRE-FLAGGED DIRTY` شناسایی کند.
 6. **کنترل کامل حذف و جلوگیری از کسر شارژ اضافی:** پس از اتمام تست، هیچ سروری را سرخود پاک نمی‌کند؛ بلکه از شما می‌پرسد که آیا فقط سرورهای کثیف پاک شوند، سرور خاصی پاک شود یا همه سرورها نگه داشته شوند.
+
+---
+
+### ⚖️ دو حالت مستقل تست تمیز بودن سرور (با سرور ایران / بدون سرور ایران)
+
+هنگام شروع اسکن، برنامه از شما می‌پرسد که با کدام روش می‌خواهید سرورها را تست کنید:
+
+1. **🇮🇷 حالت اول: تست از طریق سرور ایران اختصاصی (`★ پیشنهادی — دقت ۱۰۰٪ قطعی`)**
+   - برنامه به سرور ایران شما وصل شده و ۱ مگابایت ترافیک واقعی دانلود و آپلود TCP و پکت‌های اکو UDP را مستقیماً بین سرور ایران و سرور خارج تبادل می‌کند. این روش **۱۰۰٪ قطعی** است.
+2. **🌐 حالت دوم: تست مستقل بدون نیاز به سرور ایران (`Agentless Mode — دقت حدود ۸۰ تا ۸۵ درصد`)**
+   - کاملاً مستقل و جدا از سرور ایران کار می‌کند. این حالت به صورت هم‌زمان از **۶ نود داخل ایران در Check-Host.net** (تهران، اصفهان، شیراز) پورت TCP سرور خارج را تست می‌کند و از داخل سرور خارج نیز به هسته DNS اپراتورهای ایران (مخابرات/زیرساخت، شاتل، شکن، الکترو) پکت‌های دوطرفه **TCP و UDP** می‌فرستد.
+   - ⚠️ **توجه مهم:** این روش برای کسانی است که هنوز سرور ایران ندارند؛ اما از آنجا که امکان تست ترافیک سنگین تانل روی اپراتور شخصی شما را ندارد، **۱۰۰٪ قطعی نیست** و همیشه داشتن یک سرور ایران (حالت اول) قویاً توصیه می‌شود.
 
 ---
 

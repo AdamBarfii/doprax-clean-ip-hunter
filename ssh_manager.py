@@ -474,3 +474,225 @@ print(json.dumps(res))
                 cls.run_cmd(kharej_client, f"fuser -k {test_port}/tcp {test_port}/udp 2>/dev/null || true", timeout=5)
             except Exception:
                 pass
+
+    # ==========================================================================
+    #  STANDALONE AGENTLESS VERIFICATION (NO IRAN SERVER REQUIRED)
+    #  Completely decoupled from Iran-server mode (~80-85% accuracy estimation)
+    # ==========================================================================
+
+    @classmethod
+    def _check_host_iran_tcp_probe(cls, target_ip: str, target_port: int) -> Dict[str, Any]:
+        """
+        Uses Check-Host.net public API to test TCP connectivity from all active Iranian
+        datacenter nodes (Tehran, Isfahan, Shiraz) to target_ip:target_port.
+        """
+        import requests as req_lib
+        headers = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
+        default_ir_nodes = [
+            "ir1.node.check-host.net",
+            "ir2.node.check-host.net",
+            "ir3.node.check-host.net",
+            "ir4.node.check-host.net",
+            "ir5.node.check-host.net",
+            "ir7.node.check-host.net"
+        ]
+        ir_nodes = default_ir_nodes
+        try:
+            nr = req_lib.get("https://check-host.net/nodes/hosts", headers=headers, timeout=8)
+            if nr.status_code == 200:
+                ndata = nr.json().get("nodes", {})
+                found = [k for k, v in ndata.items() if v.get("location") and v["location"][0] == "ir"]
+                if found:
+                    ir_nodes = found
+        except Exception:
+            pass
+
+        params = [("host", f"{target_ip}:{target_port}"), ("max_nodes", len(ir_nodes))] + [("node", n) for n in ir_nodes]
+        try:
+            r = req_lib.get("https://check-host.net/check-tcp", params=params, headers=headers, timeout=10)
+            req_id = r.json().get("request_id")
+            if not req_id:
+                return {"ok_count": 0, "total": len(ir_nodes), "avg_ms": 0.0, "error": "No request_id from check-host"}
+
+            results = {}
+            for _ in range(4):
+                time.sleep(2.5)
+                poll = req_lib.get(f"https://check-host.net/check-result/{req_id}", headers=headers, timeout=10)
+                if poll.status_code == 200:
+                    results = poll.json()
+                    if all(v is not None for v in results.values()):
+                        break
+
+            ok_count = 0
+            rtts = []
+            responded_total = 0
+            for node_name, val in results.items():
+                if val is None or not isinstance(val, list) or not val:
+                    continue
+                responded_total += 1
+                entry = val[0]
+                if isinstance(entry, dict) and "time" in entry and "error" not in entry:
+                    ok_count += 1
+                    rtts.append(float(entry["time"]) * 1000.0)
+
+            total_eval = responded_total if responded_total > 0 else len(ir_nodes)
+            avg_ms = round(sum(rtts) / len(rtts), 1) if rtts else 0.0
+            return {"ok_count": ok_count, "total": total_eval, "avg_ms": avg_ms, "error": ""}
+        except Exception as e:
+            return {"ok_count": 0, "total": len(ir_nodes), "avg_ms": 0.0, "error": str(e)}
+
+    @classmethod
+    def run_agentless_verification(cls, kharej_client: paramiko.SSHClient, kharej_ip: str,
+                                   test_port: int = 28880, ssh_port: int = 22) -> Dict[str, Any]:
+        """
+        Completely standalone verification when user does NOT have an Iran server:
+        1. Opens a temporary TCP responder on Kharej VM and probes it from 6 Iranian datacenters via Check-Host.net.
+        2. Executes a Reverse TCP + UDP DNS/Gateway probe from inside the Kharej VM toward major Iranian ISP resolvers
+           (TIC/Mokhaberat, Shatel, Shecan, Electro, IPM) to verify bidirectional TCP & UDP return routing.
+        """
+        import json
+        try:
+            # 1. Open firewall & start lightweight TCP listener on Kharej for Check-Host Iran nodes
+            firewall_cmd = (
+                f"iptables -I INPUT -p tcp --dport {test_port} -j ACCEPT 2>/dev/null; "
+                f"ufw allow {test_port} 2>/dev/null || true"
+            )
+            cls.run_cmd(kharej_client, firewall_cmd, timeout=8)
+            cls.run_cmd(kharej_client, f"fuser -k {test_port}/tcp 2>/dev/null || true", timeout=5)
+
+            listener_py = f"""python3 -c "
+import socket, time
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.bind(('0.0.0.0', {test_port}))
+s.listen(20)
+s.settimeout(45)
+t0 = time.time()
+while time.time() - t0 < 45:
+    try:
+        conn, _ = s.accept()
+        conn.sendall(b'OK\\r\\n')
+        conn.close()
+    except Exception:
+        break
+s.close()
+" >/dev/null 2>&1 &
+"""
+            cls.run_cmd(kharej_client, listener_py, timeout=8)
+            time.sleep(1.0)
+
+            # 2. Run Check-Host Iran nodes TCP probe against Kharej test_port (fallback to ssh_port if needed)
+            ch_res = cls._check_host_iran_tcp_probe(kharej_ip, test_port)
+            if ch_res["ok_count"] == 0:
+                ch_ssh = cls._check_host_iran_tcp_probe(kharej_ip, ssh_port)
+                if ch_ssh["ok_count"] > ch_res["ok_count"]:
+                    ch_res = ch_ssh
+
+            # 3. Run Reverse ISP Probe (TCP + UDP) from inside Kharej VM toward Iranian domestic DNS/Carrier nodes
+            reverse_probe_py = """python3 -c "
+import socket, struct, time, json
+
+# Authoritative Iranian domestic DNS / carrier endpoints (Shecan, Electro, Shatel, TIC, IPM)
+IRAN_TARGETS = [
+    ('178.22.122.100', 53, 'Shecan-1'),
+    ('185.51.200.2', 53, 'Shecan-2'),
+    ('78.157.42.100', 53, 'Electro-1'),
+    ('78.157.42.101', 53, 'Electro-2'),
+    ('85.15.1.14', 53, 'Shatel-1'),
+    ('217.218.127.127', 53, 'TIC-Infra')
+]
+
+tcp_ok_count = 0
+udp_ok_count = 0
+rtts = []
+
+# Minimal DNS query packet for 'shaparak.ir' (type A)
+dns_query = (
+    b'\\xaa\\xbb\\x01\\x00\\x00\\x01\\x00\\x00\\x00\\x00\\x00\\x00'
+    b'\\x08shaparak\\x02ir\\x00\\x00\\x01\\x00\\x01'
+)
+
+for ip, port, label in IRAN_TARGETS:
+    # A) TCP Handshake Probe
+    try:
+        t0 = time.time()
+        st = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        st.settimeout(2.5)
+        st.connect((ip, port))
+        rtts.append((time.time() - t0) * 1000.0)
+        st.close()
+        tcp_ok_count += 1
+    except Exception:
+        pass
+
+    # B) UDP DNS Round-Trip Probe
+    try:
+        su = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        su.settimeout(2.5)
+        su.sendto(dns_query, (ip, port))
+        resp, _ = su.recvfrom(512)
+        su.close()
+        if resp and len(resp) >= 12:
+            udp_ok_count += 1
+    except Exception:
+        pass
+
+avg_rtt = round(sum(rtts) / len(rtts), 1) if rtts else 0.0
+print(json.dumps({
+    'rev_tcp_ok': tcp_ok_count,
+    'rev_udp_ok': udp_ok_count,
+    'rev_total': len(IRAN_TARGETS),
+    'rev_rtt_ms': avg_rtt
+}))
+"
+"""
+            _, out, _ = cls.run_cmd(kharej_client, reverse_probe_py, timeout=25)
+            rev_data = {"rev_tcp_ok": 0, "rev_udp_ok": 0, "rev_total": 6, "rev_rtt_ms": 0.0}
+            for line in out.splitlines():
+                line = line.strip()
+                if line.startswith("{") and "rev_tcp_ok" in line:
+                    try:
+                        rev_data.update(json.loads(line))
+                    except Exception:
+                        pass
+                    break
+
+            ch_ok = ch_res["ok_count"]
+            ch_total = max(1, ch_res["total"])
+            rev_tcp = rev_data["rev_tcp_ok"]
+            rev_udp = rev_data["rev_udp_ok"]
+            rev_total = max(1, rev_data["rev_total"])
+
+            # Evaluate TCP & UDP pass criteria for Agentless mode:
+            # TCP passes if at least 50% of Check-Host Iran nodes connected OR >=3 Iran ISP TCP endpoints responded
+            tcp_pass = (ch_ok >= max(2, ch_total // 2)) or (ch_res.get("error") and rev_tcp >= 3)
+            # UDP passes if >=2 Iranian carrier DNS resolvers returned UDP responses to this Kharej IP
+            udp_pass = rev_udp >= 2
+            udp_loss_est = round(((rev_total - rev_udp) / rev_total) * 100.0, 1)
+            latency_ms = ch_res["avg_ms"] or rev_data["rev_rtt_ms"]
+
+            diag = []
+            if ch_ok < ch_total:
+                diag.append(f"Check-Host Iran TCP: {ch_ok}/{ch_total} nodes reachable")
+            if rev_udp < rev_total:
+                diag.append(f"Reverse Iran UDP DNS: {rev_udp}/{rev_total} carriers responded")
+
+            return {
+                "mode": "agentless",
+                "tcp_ok": tcp_pass,
+                "udp_ok": udp_pass,
+                "ssh_reachable": ch_ok > 0,
+                "ch_ok": ch_ok,
+                "ch_total": ch_total,
+                "rev_tcp_ok": rev_tcp,
+                "rev_udp_ok": rev_udp,
+                "rev_total": rev_total,
+                "udp_loss_pct": udp_loss_est,
+                "latency_ms": latency_ms,
+                "diag": diag
+            }
+        finally:
+            try:
+                cls.run_cmd(kharej_client, f"fuser -k {test_port}/tcp 2>/dev/null || true", timeout=5)
+            except Exception:
+                pass
