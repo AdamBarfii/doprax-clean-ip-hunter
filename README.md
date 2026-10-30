@@ -168,13 +168,18 @@ cp config.example.json config.json
 ```
 
 ### 3. Launch AetherProbe
-- **Windows**: Double-click [`start.bat`](start.bat) or run:
+- **Modern Desktop GUI (Recommended)**: Double-click [`start_gui.bat`](start_gui.bat) or run:
+  ```powershell
+  python gui.py
+  ```
+- **Terminal CLI Mode**: Double-click [`start.bat`](start.bat) or run:
   ```powershell
   python doprax_hunter.py
   ```
 - **Linux / macOS**:
   ```bash
-  python3 doprax_hunter.py
+  python3 gui.py            # Desktop Dashboard
+  python3 doprax_hunter.py  # Terminal TUI
   ```
 
 ---
@@ -245,9 +250,11 @@ cp config.example.json config.json
 pip install -r requirements.txt
 ```
 
-۲. روی فایل **`start.bat`** دابل‌کلیک کنید (یا دستور `python doprax_hunter.py` را اجرا نمایید).
+۲. **اجرای نسخه گرافیکی مدرن (پیشنهادی):**
+روی فایل **`start_gui.bat`** دابل‌کلیک کنید (یا دستور `python gui.py` را اجرا نمایید).
 
-۳. در اولین اجرا، گزینه **`[6]`** را بزنید و `API Key` دوپراکس و آی‌پی و رمز `SSH` سرور ایران خود را وارد کنید. سپس با گزینه **`[1]`** شکار آی‌پی تمیز را آغاز کنید!
+۳. **اجرای نسخه خط فرمان (CLI):**
+روی فایل **`start.bat`** دابل‌کلیک کنید (یا دستور `python doprax_hunter.py` را اجرا نمایید).
 
 </div>
 

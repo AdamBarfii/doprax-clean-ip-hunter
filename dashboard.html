@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AetherProbe — Industrial Observability Suite</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: {
+              950: '#05080f',
+              900: '#080c14',
+              850: '#0d131f',
+              800: '#121a2b',
+              700: '#1b263b',
+              border: '#1f2d42'
+            },
+            telemetry: {
+              cyan: '#00f0ff',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              rose: '#f43f5e',
+              indigo: '#6366f1'
+            }
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', 'monospace'],
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Precision Industrial Styling */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #05080f; }
+    ::-webkit-scrollbar-thumb { background: #1f2d42; border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00f0ff; }
+    
+    .panel-box {
+      background: #0d131f;
+      border: 1px solid #1f2d42;
+    }
+    .panel-input {
+      background: #05080f;
+      border: 1px solid #1f2d42;
+      color: #f8fafc;
+      transition: all 0.15s ease-in-out;
+    }
+    .panel-input:focus {
+      border-color: #00f0ff;
+      outline: none;
+      box-shadow: 0 0 0 1px rgba(0, 240, 255, 0.35);
+    }
+    .metric-badge {
+      font-feature-settings: "tnum";
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-obsidian-950 text-slate-200 font-sans min-h-screen flex flex-col antialiased selection:bg-telemetry-cyan selection:text-black">
+
+  <!-- ========================================================================= -->
+  <!--  TOP INSTRUMENTATION BAR                                                  -->
+  <!-- ========================================================================= -->
+  <header class="bg-obsidian-900 border-b border-obsidian-border px-6 py-3 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center space-x-4">
+      <div class="w-8 h-8 rounded bg-cyan-950 border border-cyan-500/40 flex items-center justify-center text-telemetry-cyan font-mono font-bold text-base shadow-[0_0_12px_rgba(0,240,255,0.25)]">
+        AP
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="font-bold text-sm tracking-wider text-white uppercase font-mono">AETHER<span class="text-telemetry-cyan">PROBE</span></span>
+          <span class="text-[10px] font-mono tracking-widest px-2 py-0.5 rounded bg-obsidian-850 text-slate-400 border border-obsidian-border uppercase">v2.5 Observability</span>
+        </div>
+        <span class="text-[11px] text-slate-400 font-mono">High-Concurrency Cloud Discovery & Tunnel Benchmarking Suite</span>
+      </div>
+    </div>
+
+    <!-- Right Telemetry Metrics -->
+    <div class="flex items-center space-x-4 font-mono text-xs">
+      <div class="flex items-center space-x-2 px-3 py-1.5 rounded bg-obsidian-850 border border-obsidian-border">
+        <span class="text-slate-500 uppercase text-[10px]">Cloud Account:</span>
+        <span id="balStatusDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span id="balDisplay" class="font-bold text-emerald-400 metric-badge">Connecting...</span>
+      </div>
+
+      <button onclick="window.Actions.refreshBalance()" title="Refresh Balance" class="p-2 rounded bg-obsidian-850 hover:bg-obsidian-800 border border-obsidian-border text-slate-400 hover:text-white transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!--  WORKSPACE NAVIGATION TABS                                                -->
+  <!-- ========================================================================= -->
+  <nav class="bg-obsidian-900/60 border-b border-obsidian-border px-6 pt-1 flex items-center justify-between font-mono text-xs">
+    <div class="flex space-x-1">
+      <button onclick="window.Actions.switchTab('orchestrator')" id="tab-orchestrator" class="nav-tab px-4 py-2.5 border-b-2 border-telemetry-cyan text-telemetry-cyan font-bold transition flex items-center space-x-2">
+        <span>⚡ Orchestrator Console</span>
+      </button>
+      <button onclick="window.Actions.switchTab('active-vms')" id="tab-active-vms" class="nav-tab px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center space-x-2">
+        <span>🖥️ Active Cloud VMs</span>
+      </button>
+      <button onclick="window.Actions.switchTab('custom-targets')" id="tab-custom-targets" class="nav-tab px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center space-x-2">
+        <span>🎯 Custom Targets</span>
+      </button>
+      <button onclick="window.Actions.switchTab('clean-vault')" id="tab-clean-vault" class="nav-tab px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center space-x-2">
+        <span>💎 Clean Vault</span>
+        <span id="badgeCleanVault" class="px-1.5 py-0.2 rounded text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800">0</span>
+      </button>
+      <button onclick="window.Actions.switchTab('dirty-registry')" id="tab-dirty-registry" class="nav-tab px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center space-x-2">
+        <span>🚫 Dirty Registry</span>
+        <span id="badgeDirtyVault" class="px-1.5 py-0.2 rounded text-[10px] bg-rose-950 text-rose-400 border border-rose-800">0</span>
+      </button>
+      <button onclick="window.Actions.switchTab('settings')" id="tab-settings" class="nav-tab px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center space-x-2">
+        <span>⚙️ Diagnostics & Config</span>
+      </button>
+    </div>
+
+    <!-- Global State Indicator -->
+    <div class="flex items-center space-x-2 text-[11px]">
+      <span class="text-slate-500 uppercase">Engine Status:</span>
+      <span id="globalEngineStatus" class="font-bold text-slate-400">IDLE</span>
+    </div>
+  </nav>
+
+  <!-- ========================================================================= -->
+  <!--  MAIN OBSERVABILITY VIEWPORT                                              -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
+
+    <!-- --------------------------------------------------------------------- -->
+    <!--  TAB 1: ORCHESTRATOR CONSOLE                                          -->
+    <!-- --------------------------------------------------------------------- -->
+    <section id="view-orchestrator" class="space-y-6">
+      
+      <!-- Top Deployment Parameters -->
+      <div class="panel-box rounded-lg p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-obsidian-border pb-3">
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-mono font-bold text-slate-200 uppercase tracking-wider">Mission Configuration</span>
+            <span class="text-[11px] text-slate-500 font-mono">/ automated multi-threading scheduler</span>
+          </div>
+
+          <!-- Mode Toggle -->
+          <div class="flex items-center space-x-3 text-xs font-mono">
+            <span class="text-slate-400">Verification Mode:</span>
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="modeSwitch" class="sr-only peer" onchange="window.Actions.toggleMode()">
+              <div class="relative w-11 h-5 bg-obsidian-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-slate-300 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-500 peer-checked:after:bg-black border border-obsidian-border"></div>
+              <span id="modeLabel" class="ms-2.5 text-xs font-bold text-telemetry-cyan">Iran Relay Server (100% Truth)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <!-- Provider -->
+          <div>
+            <label class="block text-[11px] font-mono text-slate-400 mb-1 uppercase tracking-wider">Provider Backbone</label>
+            <select id="provSelect" onchange="window.Actions.onProviderChange()" class="w-full panel-input rounded px-3 py-2 text-xs font-mono">
+              <option value="vultr">Vultr Global Cloud</option>
+              <option value="hetzner">Hetzner Cloud</option>
+              <option value="provm">ProVM Native</option>
+              <option value="digitalocean">DigitalOcean</option>
+            </select>
+          </div>
+
+          <!-- Location -->
+          <div>
+            <label class="block text-[11px] font-mono text-slate-400 mb-1 uppercase tracking-wider">Target Region / City</label>
+            <select id="locSelect" onchange="window.Actions.onLocationChange()" class="w-full panel-input rounded px-3 py-2 text-xs font-mono">
+              <option value="">Querying API catalogue...</option>
+            </select>
+          </div>
+
+          <!-- Plan -->
+          <div>
+            <label class="block text-[11px] font-mono text-slate-400 mb-1 uppercase tracking-wider">Hardware Spec & Rate</label>
+            <select id="planSelect" class="w-full panel-input rounded px-3 py-2 text-xs font-mono">
+              <option value="">Querying plans...</option>
+            </select>
+          </div>
+
+          <!-- Batch Size -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="block text-[11px] font-mono text-slate-400 uppercase tracking-wider">Batch Workers</label>
+              <span id="batchCountDisplay" class="text-xs font-mono font-bold text-telemetry-cyan">3 Instances</span>
+            </div>
+            <input type="range" id="batchSlider" min="1" max="10" value="3" oninput="document.getElementById('batchCountDisplay').textContent = this.value + ' Instances'" class="w-full accent-cyan-400 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- Launch / Abort Action Bar -->
+        <div class="flex items-center justify-between pt-2 border-t border-obsidian-border/60">
+          <div class="flex items-center space-x-3 text-[11px] font-mono text-slate-500">
+            <span>Stack: <strong class="text-slate-300">Ubuntu 24.04</strong></span>
+            <span>Tunnel: <strong class="text-slate-300">WatTunnel Auto</strong></span>
+            <span>Concurrency: <strong class="text-slate-300">Parallel Pool</strong></span>
+          </div>
+
+          <div class="flex items-center space-x-3">
+            <button id="btnAbortScan" onclick="window.Actions.abortScan()" disabled class="hidden px-4 py-2 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 text-xs font-mono font-bold rounded transition">
+              🛑 [ABORT SCAN]
+            </button>
+            <button id="btnLaunchScan" onclick="window.Actions.startScan()" class="px-6 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-mono font-bold rounded shadow-[0_0_15px_rgba(0,240,255,0.35)] transition flex items-center space-x-2">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              <span>EXECUTE SCAN BATCH</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Multi-Step Progression Bar -->
+      <div id="orchestratorStatusBox" class="hidden panel-box rounded-lg p-4 border-l-4 border-l-cyan-400 space-y-2">
+        <div class="flex justify-between items-center text-xs font-mono">
+          <div class="flex items-center space-x-2">
+            <span id="orchestratorStageTitle" class="font-bold text-white uppercase">INITIALIZING...</span>
+          </div>
+          <span id="orchestratorStepIndicator" class="text-slate-400 font-bold">STEP 1/3</span>
+        </div>
+        <div class="w-full bg-obsidian-950 rounded-full h-1.5 overflow-hidden">
+          <div id="orchestratorStepProgress" class="bg-telemetry-cyan h-1.5 rounded-full transition-all duration-300" style="width: 10%"></div>
+        </div>
+        <p id="orchestratorStatusMessage" class="text-[11px] font-mono text-slate-400">Communicating with Doprax Cloud infrastructure...</p>
+      </div>
+
+      <!-- Live Server Telemetry Grid -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between font-mono text-xs">
+          <span class="font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
+            <span>Server Worker Telemetry</span>
+            <span id="liveWorkerCount" class="text-[10px] px-2 py-0.5 rounded bg-obsidian-850 text-slate-400 border border-obsidian-border">0 active</span>
+          </span>
+          <div id="batchResolutionActions" class="hidden flex items-center space-x-2">
+            <button onclick="window.Actions.purgeDirtyOnly()" class="px-3 py-1 bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-800 text-[11px] font-bold rounded transition">
+              🗑️ Purge Dirty Only
+            </button>
+            <button onclick="window.Actions.keepAllBatch()" class="px-3 py-1 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[11px] font-bold rounded transition">
+              💾 Keep All Instances
+            </button>
+          </div>
+        </div>
+
+        <div id="vmGridContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="col-span-full panel-box rounded-lg p-8 text-center text-slate-500 font-mono text-xs">
+            Awaiting execution parameters. Select configuration above and click <span class="text-cyan-400 font-bold">[EXECUTE SCAN BATCH]</span> to deploy workers.
+          </div>
+        </div>
+      </div>
+
+      <!-- Collapsible Live Log Stream Terminal -->
+      <div class="panel-box rounded-lg overflow-hidden font-mono text-xs">
+        <div class="px-4 py-2.5 bg-obsidian-900 border-b border-obsidian-border flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="font-bold text-slate-300 uppercase tracking-wider text-[11px]">Industrial Telemetry Stream</span>
+            <span class="text-slate-600 text-[10px]">/ stdout</span>
+          </div>
+          <div class="flex items-center space-x-3 text-[11px]">
+            <label class="flex items-center space-x-1 cursor-pointer text-slate-400">
+              <input type="checkbox" id="autoScrollLog" checked class="accent-cyan-400">
+              <span>Auto-Scroll</span>
+            </label>
+            <button onclick="window.Actions.clearLogs()" class="text-slate-500 hover:text-slate-300 transition">Clear Buffer</button>
+          </div>
+        </div>
+        <div id="consoleLogStream" class="h-48 overflow-y-auto p-4 space-y-1 bg-obsidian-950 text-[11px] font-mono select-text">
+          <div class="text-slate-600">[SYSTEM] AetherProbe Observability Core initialized. Ready.</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- --------------------------------------------------------------------- -->
+    <!--  TAB 2: ACTIVE CLOUD VMS                                              -->
+    <!-- --------------------------------------------------------------------- -->
+    <section id="view-active-vms" class="hidden space-y-6">
+      <div class="panel-box rounded-lg p-4 flex justify-between items-center font-mono text-xs">
+        <div>
+          <h3 class="font-bold text-white text-sm">Provisioned Doprax Instances</h3>
+          <p class="text-slate-400 text-[11px]">Live state of cloud virtual machines running under your Doprax subscription.</p>
+        </div>
+        <div class="flex space-x-2">
+          <button onclick="window.Actions.loadExistingVMs()" class="px-3 py-1.5 panel-input hover:bg-obsidian-850 rounded font-bold transition">
+            🔄 Query API
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-box rounded-lg overflow-hidden font-mono text-xs">
+        <table class="w-full text-left">
+          <thead class="bg-obsidian-900 text-slate-400 uppercase text-[10px] tracking-wider border-b border-obsidian-border">
+            <tr>
+              <th class="px-4 py-3">Service ID</th>
+              <th class="px-4 py-3">VM Name</th>
+              <th class="px-4 py-3">State</th>
+              <th class="px-4 py-3">Assigned IP</th>
+              <th class="px-4 py-3 text-right">Lifecycle Actions</th>
+            </tr>
+          </thead>
+          <tbody id="existingVMsBody" class="divide-y divide-obsidian-border text-[11px]">
+            <tr><td colspan="5" class="px-4 py-6 text-center text-slate-600">Click 'Query API' to inspect active cloud instances.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------------------- -->
+    <!--  TAB 3: CUSTOM TARGETS                                                -->
+    <!-- --------------------------------------------------------------------- -->
+    <section id="view-custom-targets" class="hidden space-y-6">
+      <div class="panel-box rounded-lg p-5 space-y-4 font-mono text-xs">
+        <h3 class="font-bold text-white text-sm uppercase">Add Custom Third-Party Host</h3>
+        <p class="text-slate-400 text-[11px]">Benchmark any arbitrary external VPS or dedicated server against your domestic Iran node.</p>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <input type="text" id="custHost" placeholder="Host IP (e.g. 198.51.100.1)" class="panel-input rounded px-3 py-2 text-xs">
+          <input type="number" id="custPort" value="22" placeholder="Port" class="panel-input rounded px-3 py-2 text-xs">
+          <input type="text" id="custUser" value="root" placeholder="User" class="panel-input rounded px-3 py-2 text-xs">
+          <input type="password" id="custPass" placeholder="Root Password" class="panel-input rounded px-3 py-2 text-xs">
+        </div>
+        <div class="flex justify-end">
+          <button onclick="window.Actions.addCustomHost()" class="px-5 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded transition">
+            Save Target
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-box rounded-lg overflow-hidden font-mono text-xs">
+        <div class="px-4 py-3 bg-obsidian-900 border-b border-obsidian-border flex justify-between items-center">
+          <span class="font-bold text-slate-300 uppercase text-[11px]">Registered Custom Targets</span>
+          <span id="custCountBadge" class="text-slate-500">0 targets</span>
+        </div>
+        <table class="w-full text-left">
+          <thead class="bg-obsidian-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-obsidian-border">
+            <tr>
+              <th class="px-4 py-2.5">Endpoint Host</th>
+              <th class="px-4 py-2.5">Port</th>
+              <th class="px-4 py-2.5">User</th>
+              <th class="px-4 py-2.5 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="customHostsBody" class="divide-y divide-obsidian-border text-[11px]">
+            <tr><td colspan="4" class="px-4 py-6 text-center text-slate-600">No custom hosts registered.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------------------- -->
+    <!--  TAB 4: CLEAN VAULT                                                   -->
+    <!-- --------------------------------------------------------------------- -->
+    <section id="view-clean-vault" class="hidden space-y-6">
+      <div class="panel-box rounded-lg p-4 flex justify-between items-center font-mono text-xs border-l-4 border-l-emerald-500">
+        <div>
+          <h3 class="font-bold text-white text-sm">Verified Clean Route Vault</h3>
+          <p class="text-slate-400 text-[11px]">All servers confirmed 100% unthrottled with bidirectional throughput & zero-loss tunnel reachability.</p>
+        </div>
+      </div>
+
+      <div class="panel-box rounded-lg overflow-hidden font-mono text-xs">
+        <table class="w-full text-left">
+          <thead class="bg-obsidian-900 text-slate-400 uppercase text-[10px] tracking-wider border-b border-obsidian-border">
+            <tr>
+              <th class="px-4 py-3">Routeable IP</th>
+              <th class="px-4 py-3">Provider</th>
+              <th class="px-4 py-3">Root Secret</th>
+              <th class="px-4 py-3">TCP Down / Up</th>
+              <th class="px-4 py-3">UDP Loss</th>
+              <th class="px-4 py-3">Timestamp</th>
+              <th class="px-4 py-3 text-right">WatTunnel Token</th>
+            </tr>
+          </thead>
+          <tbody id="cleanVaultBody" class="divide-y divide-obsidian-border text-[11px]">
+            <tr><td colspan="7" class="px-4 py-6 text-center text-slate-600">No clean verified routes in vault yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------------------- -->
+    <!--  TAB 5: DIRTY REGISTRY                                                -->
+    <!-- --------------------------------------------------------------------- -->
+    <section id="view-dirty-registry" class="hidden space-y-6">
+      <div class="panel-box rounded-lg p-4 flex justify-between items-center font-mono text-xs border-l-4 border-l-rose-500">
+        <div>
+          <h3 class="font-bold text-white text-sm">Local Blocked / Dirty IP Registry</h3>
+          <p class="text-slate-400 text-[11px]">Permanent blacklist preventing re-testing if cloud provider cycles previously blocked IP space.</p>
+        </div>
+        <div>
+          <input type="text" id="dirtyFilterInput" oninput="window.Actions.filterDirty()" placeholder="Filter IP / reason..." class="panel-input rounded px-3 py-1 text-xs">
+        </div>
+      </div>
+
+      <div class="panel-box rounded-lg overflow-hidden font-mono text-xs">
+        <table class="w-full text-left">
+          <thead class="bg-obsidian-900 text-slate-400 uppercase text-[10px] tracking-wider border-b border-obsidian-border">
+            <tr>
+              <th class="px-4 py-3">Flagged IP</th>
+              <th class="px-4 py-3">Provider</th>
+              <th class="px-4 py-3">Failure Diagnostics</th>
+              <th class="px-4 py-3 text-center">Hits</th>
+              <th class="px-4 py-3">Recorded Time</th>
+              <th class="px-4 py-3 text-right">Registry Action</th>
+            </tr>
+          </thead>
+          <tbody id="dirtyRegistryBody" class="divide-y divide-obsidian-border text-[11px]">
+            <tr><td colspan="6" class="px-4 py-6 text-center text-slate-600">Dirty registry is empty.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------------------- -->
+    <!--  TAB 6: DIAGNOSTICS & CONFIG                                          -->
+    <!-- --------------------------------------------------------------------- -->
+    <section id="view-settings" class="hidden space-y-6 max-w-2xl mx-auto font-mono text-xs">
+      <div class="panel-box rounded-lg p-6 space-y-6">
+        <h3 class="font-bold text-white text-sm uppercase tracking-wider border-b border-obsidian-border pb-3">Subsystem Credentials</h3>
+
+        <!-- Doprax Key -->
+        <div class="space-y-1.5">
+          <label class="block text-slate-400 uppercase text-[11px]">Doprax Cloud API Key</label>
+          <input type="password" id="cfgDopraxKey" placeholder="Paste Doprax API Secret" class="w-full panel-input rounded px-3 py-2 text-xs">
+          <p class="text-slate-500 text-[10px]">Required to invoke v2/v3 provisioning endpoints on www.doprax.com</p>
+        </div>
+
+        <!-- Iran Server Node -->
+        <div class="space-y-3 pt-3 border-t border-obsidian-border">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300 uppercase font-bold text-[11px]">Domestic Relay Node (Iran SSH)</span>
+            <button onclick="window.Actions.probeIranSSH()" class="text-telemetry-cyan hover:underline font-bold text-[11px]">⚡ Probe Handshake</button>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-500 text-[10px] mb-1">IPv4 Address</label>
+              <input type="text" id="cfgIranHost" class="w-full panel-input rounded px-3 py-1.5 text-xs">
+            </div>
+            <div>
+              <label class="block text-slate-500 text-[10px] mb-1">Port</label>
+              <input type="number" id="cfgIranPort" value="22" class="w-full panel-input rounded px-3 py-1.5 text-xs">
+            </div>
+            <div>
+              <label class="block text-slate-500 text-[10px] mb-1">Username</label>
+              <input type="text" id="cfgIranUser" value="root" class="w-full panel-input rounded px-3 py-1.5 text-xs">
+            </div>
+            <div>
+              <label class="block text-slate-500 text-[10px] mb-1">Password</label>
+              <input type="password" id="cfgIranPass" class="w-full panel-input rounded px-3 py-1.5 text-xs">
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-obsidian-border flex justify-end">
+          <button onclick="window.Actions.saveCredentials()" class="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded transition">
+            Save Configuration
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!--  FRONTEND CONTROLLER (Event-Driven Reactive Store)                          -->
+  <!-- ========================================================================= -->
+  <script>
+    // 1. Reactive State Store
+    window.AppState = {
+      isScanning: false,
+      balance: null,
+      activeTab: 'orchestrator',
+      plansCache: {},
+      dirtyRegistry: [],
+      cleanVault: [],
+      vmsInFlight: {},
+      logLines: [],
+
+      // Handles real-time event packets pushed from Python
+      handleBackendEvent: function (jsonStr) {
+        try {
+          const evt = JSON.parse(jsonStr);
+          window.EventBus.dispatch(evt.type, evt.payload);
+        } catch (e) {
+          console.error("Malformed event packet:", e, jsonStr);
+        }
+      }
+    };
+
+    // 2. Event Bus Subscriptions
+    window.EventBus = {
+      listeners: {},
+      on: function (type, callback) {
+        if (!this.listeners[type]) this.listeners[type] = [];
+        this.listeners[type].push(callback);
+      },
+      dispatch: function (type, payload) {
+        if (this.listeners[type]) {
+          this.listeners[type].forEach(fn => fn(payload));
+        }
+      }
+    };
+
+    // -------------------------------------------------------------------------
+    //  Event Listeners
+    // -------------------------------------------------------------------------
+    window.EventBus.on("LOG_STREAM", function (data) {
+      const consoleBox = document.getElementById("consoleLogStream");
+      const div = document.createElement("div");
+      
+      let colorClass = "text-slate-400";
+      if (data.level === "ERROR") colorClass = "text-rose-400 font-bold";
+      else if (data.level === "SUCCESS") colorClass = "text-emerald-400 font-bold";
+      else if (data.level === "WARN") colorClass = "text-amber-400 font-bold";
+      else if (data.level === "INFO") colorClass = "text-slate-300";
+
+      div.className = colorClass;
+      div.textContent = `[${data.time}] [${data.source}] ${data.message}`;
+      consoleBox.appendChild(div);
+
+      if (document.getElementById("autoScrollLog").checked) {
+        consoleBox.scrollTop = consoleBox.scrollHeight;
+      }
+    });
+
+    window.EventBus.on("SCAN_STATUS", function (data) {
+      const box = document.getElementById("orchestratorStatusBox");
+      const title = document.getElementById("orchestratorStageTitle");
+      const msg = document.getElementById("orchestratorStatusMessage");
+      const step = document.getElementById("orchestratorStepIndicator");
+      const progress = document.getElementById("orchestratorStepProgress");
+      const globalStatus = document.getElementById("globalEngineStatus");
+
+      if (data.status === "CANCELLED" || data.status === "ERROR") {
+        window.AppState.isScanning = false;
+        box.classList.add("hidden");
+        document.getElementById("btnLaunchScan").disabled = false;
+        document.getElementById("btnAbortScan").classList.add("hidden");
+        document.getElementById("btnAbortScan").disabled = true;
+        globalStatus.textContent = data.status;
+        globalStatus.className = "font-bold text-rose-400";
+        return;
+      }
+
+      box.classList.remove("hidden");
+      title.textContent = data.status;
+      msg.textContent = data.message || "";
+      if (data.step) {
+        step.textContent = `STEP ${data.step}/${data.total_steps || 3}`;
+        progress.style.width = `${(data.step / 3) * 100}%`;
+      }
+      globalStatus.textContent = data.status;
+      globalStatus.className = "font-bold text-telemetry-cyan animate-pulse";
+    });
+
+    window.EventBus.on("VM_STAGE_UPDATE", function (vm) {
+      const container = document.getElementById("vmGridContainer");
+      let card = document.getElementById(`vm-card-${vm.idx}`);
+
+      // Clear empty placeholder if exists
+      if (container.querySelector(".col-span-full")) {
+        container.innerHTML = "";
+      }
+
+      if (!card) {
+        card = document.createElement("div");
+        card.id = `vm-card-${vm.idx}`;
+        card.className = "panel-box rounded-lg p-4 font-mono text-xs space-y-3 border-l-4 transition-all duration-300";
+        container.appendChild(card);
+      }
+
+      // Border and stage color coding
+      let borderClass = "border-l-cyan-400";
+      let statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800">${vm.stage}</span>`;
+
+      if (vm.stage === "CLEAN") {
+        borderClass = "border-l-emerald-500 bg-emerald-950/20";
+        statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 font-bold shadow-[0_0_10px_rgba(16,185,129,0.3)]">ROUTE CLEAN</span>`;
+      } else if (vm.stage === "DIRTY" || vm.stage === "FLAGGED_DIRTY" || vm.stage === "SSH_TIMEOUT" || vm.stage === "FAILED") {
+        borderClass = "border-l-rose-500 bg-rose-950/20";
+        statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-rose-950 text-rose-400 border border-rose-800 font-bold">ROUTE DIRTY</span>`;
+      }
+
+      card.className = `panel-box rounded-lg p-4 font-mono text-xs space-y-2.5 border-l-4 ${borderClass}`;
+      card.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-white uppercase">Worker #${vm.idx} (${vm.datacenter || 'Cloud'})</span>
+          ${statusBadge}
+        </div>
+        <div class="space-y-1 text-[11px]">
+          <div class="flex justify-between"><span class="text-slate-500">Public IP:</span> <strong class="text-white">${vm.ip || 'Provisioning...'}</strong></div>
+          <div class="flex justify-between"><span class="text-slate-500">TCP Stream:</span> <span class="${vm.clean ? 'text-emerald-400 font-bold' : 'text-slate-300'}">${vm.tcp_result || 'In Flight...'}</span></div>
+          <div class="flex justify-between"><span class="text-slate-500">UDP Echo:</span> <span class="text-slate-300">${vm.udp_result || 'In Flight...'}</span></div>
+        </div>
+        <div class="pt-2 border-t border-obsidian-border flex justify-between items-center text-[10px]">
+          <span class="text-slate-500 font-mono">${vm.id ? vm.id.substring(0, 12) + '...' : 'ID Pending'}</span>
+          ${vm.id ? `<button onclick="window.Actions.deleteInstanceById('${vm.id}')" class="text-rose-400 hover:underline">Terminate</button>` : ''}
+        </div>
+      `;
+
+      // Update count
+      const activeCount = container.querySelectorAll(".panel-box").length;
+      document.getElementById("liveWorkerCount").textContent = `${activeCount} workers`;
+    });
+
+    window.EventBus.on("SCAN_COMPLETE", function (summary) {
+      window.AppState.isScanning = false;
+      document.getElementById("orchestratorStatusBox").classList.add("hidden");
+      document.getElementById("btnLaunchScan").disabled = false;
+      document.getElementById("btnAbortScan").classList.add("hidden");
+      document.getElementById("btnAbortScan").disabled = true;
+      document.getElementById("globalEngineStatus").textContent = "COMPLETE";
+      document.getElementById("globalEngineStatus").className = "font-bold text-emerald-400";
+      document.getElementById("batchResolutionActions").classList.remove("hidden");
+
+      window.Actions.refreshBalance();
+      window.Actions.loadCleanVault();
+      window.Actions.loadDirtyRegistry();
+    });
+
+    // -------------------------------------------------------------------------
+    //  UI Actions Controller
+    // -------------------------------------------------------------------------
+    window.Actions = {
+      switchTab: function (tabId) {
+        document.querySelectorAll(".nav-tab").forEach(tab => {
+          tab.classList.remove("border-telemetry-cyan", "text-telemetry-cyan", "font-bold");
+          tab.classList.add("border-transparent", "text-slate-400");
+        });
+        const activeTab = document.getElementById(`tab-${tabId}`);
+        if (activeTab) {
+          activeTab.classList.remove("border-transparent", "text-slate-400");
+          activeTab.classList.add("border-telemetry-cyan", "text-telemetry-cyan", "font-bold");
+        }
+
+        document.querySelectorAll("main > section").forEach(sec => sec.classList.add("hidden"));
+        const activeSection = document.getElementById(`view-${tabId}`);
+        if (activeSection) activeSection.classList.remove("hidden");
+
+        if (tabId === "clean-vault") this.loadCleanVault();
+        if (tabId === "dirty-registry") this.loadDirtyRegistry();
+        if (tabId === "active-vms") this.loadExistingVMs();
+        if (tabId === "custom-targets") this.loadCustomHosts();
+      },
+
+      toggleMode: function () {
+        const sw = document.getElementById("modeSwitch");
+        const lbl = document.getElementById("modeLabel");
+        if (sw.checked) {
+          lbl.textContent = "Agentless Mode (~85% Accuracy)";
+          lbl.className = "ms-2.5 text-xs font-bold text-amber-400";
+        } else {
+          lbl.textContent = "Iran Relay Server (100% Truth)";
+          lbl.className = "ms-2.5 text-xs font-bold text-telemetry-cyan";
+        }
+      },
+
+      startScan: async function () {
+        if (!window.pywebview) return;
+        const prov = document.getElementById("provSelect").value;
+        const loc = document.getElementById("locSelect").value;
+        const plan = document.getElementById("planSelect").value;
+        const batch = parseInt(document.getElementById("batchSlider").value);
+        const mode = document.getElementById("modeSwitch").checked ? "agentless" : "iran";
+
+        document.getElementById("btnLaunchScan").disabled = true;
+        const btnAbort = document.getElementById("btnAbortScan");
+        btnAbort.classList.remove("hidden");
+        btnAbort.disabled = false;
+        document.getElementById("batchResolutionActions").classList.add("hidden");
+        document.getElementById("vmGridContainer").innerHTML = "";
+
+        window.AppState.isScanning = true;
+
+        const res = await window.pywebview.api.start_hunt_job({
+          provider: prov,
+          location: loc,
+          plan: plan,
+          batch_size: batch,
+          mode: mode
+        });
+      },
+
+      abortScan: async function () {
+        if (!confirm("Are you sure you want to abort the current scan? Pending threads will halt.")) return;
+        await window.pywebview.api.abort_active_scan();
+      },
+
+      onProviderChange: async function () {
+        if (!window.pywebview) return;
+        const prov = document.getElementById("provSelect").value;
+        const locSelect = document.getElementById("locSelect");
+        const planSelect = document.getElementById("planSelect");
+
+        locSelect.innerHTML = "<option>Querying provider catalogue...</option>";
+        planSelect.innerHTML = "<option>Loading specs...</option>";
+
+        const plans = await window.pywebview.api.list_plans(prov);
+        window.AppState.plansCache[prov] = plans || [];
+
+        // Group unique locations
+        const locMap = {};
+        for (const p of plans) {
+          for (const l of (p.locations || [])) {
+            if (!locMap[l.name]) locMap[l.name] = l;
+          }
+        }
+
+        const sortedLocs = Object.values(locMap).sort((a, b) => {
+          const isDE_a = a.name.includes("DE,") || a.name.includes("Frankfurt");
+          const isDE_b = b.name.includes("DE,") || b.name.includes("Frankfurt");
+          if (isDE_a && !isDE_b) return -1;
+          if (!isDE_a && isDE_b) return 1;
+          return a.name.localeCompare(b.name);
+        });
+
+        locSelect.innerHTML = "";
+        for (const l of sortedLocs) {
+          const opt = document.createElement("option");
+          opt.value = l.name;
+          opt.textContent = `${l.name} (${l.code})`;
+          locSelect.appendChild(opt);
+        }
+
+        this.onLocationChange();
+      },
+
+      onLocationChange: function () {
+        const prov = document.getElementById("provSelect").value;
+        const loc = document.getElementById("locSelect").value;
+        const planSelect = document.getElementById("planSelect");
+        planSelect.innerHTML = "";
+
+        const allPlans = window.AppState.plansCache[prov] || [];
+        const matched = allPlans.filter(p => (p.locations || []).some(l => l.name === loc));
+        matched.sort((a, b) => (a.monthly_price || 0) - (b.monthly_price || 0));
+
+        if (matched.length === 0) {
+          planSelect.innerHTML = "<option value='VC2-1C-1GB'>VC2-1C-1GB (Default)</option>";
+          return;
+        }
+
+        for (const p of matched) {
+          const opt = document.createElement("option");
+          opt.value = p.plan;
+          opt.textContent = `${p.plan} — ${p.ram_gb}GB RAM / ${p.cpu} CPU ($${p.monthly_price}/mo)`;
+          planSelect.appendChild(opt);
+        }
+      },
+
+      refreshBalance: async function () {
+        if (!window.pywebview) return;
+        const bal = await window.pywebview.api.get_balance();
+        const display = document.getElementById("balDisplay");
+        const dot = document.getElementById("balStatusDot");
+        if (bal && bal.available_balance_cents !== undefined) {
+          const dollars = (bal.available_balance_cents / 100).toFixed(2);
+          display.textContent = `$${dollars} USD`;
+          dot.className = "w-2 h-2 rounded-full bg-emerald-400";
+        } else {
+          display.textContent = "Unauthenticated";
+          dot.className = "w-2 h-2 rounded-full bg-rose-400";
+        }
+      },
+
+      loadCleanVault: async function () {
+        if (!window.pywebview) return;
+        const list = await window.pywebview.api.list_clean_servers();
+        document.getElementById("badgeCleanVault").textContent = list.length;
+        const tbody = document.getElementById("cleanVaultBody");
+        tbody.innerHTML = "";
+
+        if (list.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='7' class='px-4 py-6 text-center text-slate-600'>Clean route vault is empty.</td></tr>";
+          return;
+        }
+
+        list.forEach(s => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-obsidian-900 transition";
+          tr.innerHTML = `
+            <td class="px-4 py-3 font-bold text-emerald-400">${s.ip}</td>
+            <td class="px-4 py-3 text-cyan-300">${s.datacenter || 'Doprax'}</td>
+            <td class="px-4 py-3 text-amber-300 font-mono select-all">${s.password || 'N/A'}</td>
+            <td class="px-4 py-3 text-slate-300">↓${s.tcp_down_kb || 0}K ↑${s.tcp_up_kb || 0}K</td>
+            <td class="px-4 py-3 text-slate-300">${s.udp_loss_pct || 0}%</td>
+            <td class="px-4 py-3 text-slate-500 text-[10px]">${s.saved_at || ''}</td>
+            <td class="px-4 py-3 text-right">
+              <button onclick="navigator.clipboard.writeText('${s.token || ''}')" class="px-2 py-0.5 bg-obsidian-850 hover:bg-obsidian-800 text-telemetry-cyan text-[10px] rounded border border-obsidian-border">Copy Token</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      },
+
+      loadDirtyRegistry: async function () {
+        if (!window.pywebview) return;
+        const dirty = await window.pywebview.api.list_dirty_ips();
+        window.AppState.dirtyRegistry = dirty || [];
+        document.getElementById("badgeDirtyVault").textContent = window.AppState.dirtyRegistry.length;
+        this.renderDirtyTable(window.AppState.dirtyRegistry);
+      },
+
+      renderDirtyTable: function (list) {
+        const tbody = document.getElementById("dirtyRegistryBody");
+        tbody.innerHTML = "";
+        if (list.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='6' class='px-4 py-6 text-center text-slate-600'>Dirty registry is empty.</td></tr>";
+          return;
+        }
+        list.forEach(d => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-obsidian-900 transition";
+          tr.innerHTML = `
+            <td class="px-4 py-2.5 font-bold text-rose-400">${d.ip}</td>
+            <td class="px-4 py-2.5 text-cyan-300">${d.provider || 'Doprax'}</td>
+            <td class="px-4 py-2.5 text-slate-300">${d.reason || 'Blocked'}</td>
+            <td class="px-4 py-2.5 text-center text-amber-300 font-bold">${d.hit_count || 1}</td>
+            <td class="px-4 py-2.5 text-slate-500 text-[10px]">${d.flagged_at || ''}</td>
+            <td class="px-4 py-2.5 text-right">
+              <button onclick="window.Actions.unflagDirty('${d.ip}')" class="px-2 py-0.5 bg-obsidian-850 hover:bg-obsidian-800 text-amber-400 text-[10px] rounded border border-obsidian-border">Unflag</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      },
+
+      filterDirty: function () {
+        const q = document.getElementById("dirtyFilterInput").value.toLowerCase();
+        const filtered = window.AppState.dirtyRegistry.filter(d => (d.ip || '').toLowerCase().includes(q) || (d.reason || '').toLowerCase().includes(q));
+        this.renderDirtyTable(filtered);
+      },
+
+      unflagDirty: async function (ip) {
+        await window.pywebview.api.unflag_ip(ip);
+        this.loadDirtyRegistry();
+      },
+
+      deleteInstanceById: async function (id) {
+        if (!confirm(`Confirm immediate termination of VM ${id}?`)) return;
+        await window.pywebview.api.delete_instance(id);
+        const card = document.getElementById(`vm-card-${id}`);
+        if (card) card.remove();
+        this.refreshBalance();
+      },
+
+      loadExistingVMs: async function () {
+        if (!window.pywebview) return;
+        const tbody = document.getElementById("existingVMsBody");
+        tbody.innerHTML = "<tr><td colspan='5' class='px-4 py-6 text-center text-cyan-400'>Querying Doprax Cloud instances...</td></tr>";
+        const list = await window.pywebview.api.list_existing_vms();
+        tbody.innerHTML = "";
+        if (list.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='5' class='px-4 py-6 text-center text-slate-600'>No active instances provisioned.</td></tr>";
+          return;
+        }
+        list.forEach(vm => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-obsidian-900 transition";
+          tr.innerHTML = `
+            <td class="px-4 py-2.5 font-mono text-cyan-300">${vm.service_id}</td>
+            <td class="px-4 py-2.5 font-bold text-white">${vm.name}</td>
+            <td class="px-4 py-2.5"><span class="px-2 py-0.5 rounded text-[10px] bg-obsidian-850 text-emerald-400 border border-emerald-900/40">${vm.status}</span></td>
+            <td class="px-4 py-2.5 text-slate-300">${vm.ip}</td>
+            <td class="px-4 py-2.5 text-right">
+              <button onclick="window.Actions.deleteInstanceById('${vm.service_id}')" class="px-2 py-0.5 bg-rose-950 text-rose-300 text-[10px] rounded border border-rose-900 hover:bg-rose-900 transition">Destroy</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      },
+
+      loadCustomHosts: async function () {
+        if (!window.pywebview) return;
+        const list = await window.pywebview.api.list_custom_servers();
+        document.getElementById("custCountBadge").textContent = `${list.length} targets`;
+        const tbody = document.getElementById("customHostsBody");
+        tbody.innerHTML = "";
+        if (list.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='4' class='px-4 py-6 text-center text-slate-600'>No custom hosts registered.</td></tr>";
+          return;
+        }
+        list.forEach(s => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-obsidian-900 transition";
+          tr.innerHTML = `
+            <td class="px-4 py-2.5 font-bold text-white">${s.host}</td>
+            <td class="px-4 py-2.5 text-slate-400">${s.port || 22}</td>
+            <td class="px-4 py-2.5 text-slate-400">${s.username || 'root'}</td>
+            <td class="px-4 py-2.5 text-right">
+              <button class="px-2 py-0.5 bg-obsidian-850 text-slate-400 text-[10px] rounded border border-obsidian-border cursor-not-allowed">Saved</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      },
+
+      addCustomHost: async function () {
+        const host = document.getElementById("custHost").value.trim();
+        const port = parseInt(document.getElementById("custPort").value) || 22;
+        const user = document.getElementById("custUser").value.trim() || "root";
+        const pass = document.getElementById("custPass").value;
+        if (!host) return alert("Host IPv4 required");
+        await window.pywebview.api.add_custom_server({ host: host, port: port, username: user, password: pass });
+        this.loadCustomHosts();
+        document.getElementById("custHost").value = "";
+        document.getElementById("custPass").value = "";
+      },
+
+      loadSettings: async function () {
+        if (!window.pywebview) return;
+        const cfg = await window.pywebview.api.get_config();
+        if (cfg) {
+          document.getElementById("cfgDopraxKey").value = cfg.doprax_api_key || "";
+          if (cfg.iran_server) {
+            document.getElementById("cfgIranHost").value = cfg.iran_server.host || "";
+            document.getElementById("cfgIranPort").value = cfg.iran_server.port || 22;
+            document.getElementById("cfgIranUser").value = cfg.iran_server.username || "root";
+            document.getElementById("cfgIranPass").value = cfg.iran_server.password || "";
+          }
+        }
+      },
+
+      saveCredentials: async function () {
+        const key = document.getElementById("cfgDopraxKey").value.trim();
+        const host = document.getElementById("cfgIranHost").value.trim();
+        const port = parseInt(document.getElementById("cfgIranPort").value) || 22;
+        const user = document.getElementById("cfgIranUser").value.trim() || "root";
+        const pass = document.getElementById("cfgIranPass").value;
+
+        await window.pywebview.api.save_config({
+          doprax_api_key: key,
+          iran_server: { host: host, port: port, username: user, password: pass }
+        });
+        alert("Configuration persisted to disk.");
+        this.refreshBalance();
+      },
+
+      probeIranSSH: async function () {
+        const res = await window.pywebview.api.test_iran_connection({
+          host: document.getElementById("cfgIranHost").value.trim(),
+          port: parseInt(document.getElementById("cfgIranPort").value) || 22,
+          username: document.getElementById("cfgIranUser").value.trim() || "root",
+          password: document.getElementById("cfgIranPass").value
+        });
+        alert(`Probe result: ${res.msg}`);
+      },
+
+      clearLogs: function () {
+        document.getElementById("consoleLogStream").innerHTML = "";
+      }
+    };
+
+    // 3. Lifecycle Initialization
+    window.addEventListener("pywebviewready", function () {
+      window.Actions.refreshBalance();
+      window.Actions.loadSettings();
+      window.Actions.loadCleanVault();
+      window.Actions.loadDirtyRegistry();
+      window.Actions.onProviderChange();
+    });
+  </script>
+</body>
+</html>
