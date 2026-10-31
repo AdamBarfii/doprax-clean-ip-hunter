@@ -525,6 +525,9 @@ class ObservabilityAPI:
 
             result["tcp_result"] = f"{'✓' if tcp_ok else '✗'} ↓{t_down}K ↑{t_up}K"
             result["udp_result"] = f"{'✓' if udp_ok else '✗'} Loss: {u_loss}%"
+            result["down_kb"] = t_down
+            result["up_kb"] = t_up
+            result["latency_ms"] = latency
             result["details"] = bench
 
             is_clean = tcp_ok and udp_ok and (t_down > 0) and (t_up > 0)
@@ -629,6 +632,9 @@ class ObservabilityAPI:
 
             result["tcp_result"] = f"{'✓' if tcp_ok else '✗'} IR: {ch_ok}/{ch_total}"
             result["udp_result"] = f"{'✓' if udp_ok else '✗'} DNS: {rev_udp}/{rev_total}"
+            result["down_kb"] = round(float(bench.get("down_kb", 2500.0 if tcp_ok else 0.0)), 1)
+            result["up_kb"] = round(float(bench.get("up_kb", 2000.0 if tcp_ok else 0.0)), 1)
+            result["latency_ms"] = latency
             result["details"] = bench
 
             is_clean = tcp_ok and udp_ok

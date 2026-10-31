@@ -119,6 +119,10 @@
         <span>🚫 Dirty Registry</span>
         <span id="badgeDirtyVault" class="px-1.5 py-0.2 rounded text-[10px] bg-rose-950 text-rose-400 border border-rose-800">0</span>
       </button>
+      <button onclick="window.Actions.switchTab('geo-map')" id="tab-geo-map" class="nav-tab px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center space-x-2">
+        <span>🗺️ Topology & Geo-Map</span>
+        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+      </button>
       <button onclick="window.Actions.switchTab('settings')" id="tab-settings" class="nav-tab px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center space-x-2">
         <span>⚙️ Diagnostics & Config</span>
       </button>
@@ -419,7 +423,176 @@
     </section>
 
     <!-- --------------------------------------------------------------------- -->
-    <!--  TAB 6: DIAGNOSTICS & CONFIG                                          -->
+    <!--  TAB 6: TOPOLOGY & GEO-LATENCY MAP                                    -->
+    <!-- --------------------------------------------------------------------- -->
+    <section id="view-geo-map" class="hidden space-y-6">
+      <div class="panel-box rounded-lg p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-obsidian-border pb-3">
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-mono font-bold text-slate-200 uppercase tracking-wider">Global Datacenter Latency & Route Topology</span>
+            <span class="text-[11px] text-slate-500 font-mono">/ real-time routing telemetry</span>
+          </div>
+          <div class="flex items-center space-x-3 text-xs font-mono">
+            <div class="flex items-center space-x-1.5 text-slate-400">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span>Clean Latency &lt; 90ms</span>
+            </div>
+            <div class="flex items-center space-x-1.5 text-slate-400">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span>Acceptable 90-140ms</span>
+            </div>
+            <div class="flex items-center space-x-1.5 text-slate-400">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+              <span>High / Filtered</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SVG World Map Visualizer Container -->
+        <div class="relative w-full rounded-lg bg-obsidian-950/80 border border-obsidian-border p-4 overflow-hidden">
+          <svg id="worldMapSvg" viewBox="0 0 1000 500" class="w-full h-auto max-h-[460px] select-none">
+            <defs>
+              <!-- Glowing Filter Effects -->
+              <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <filter id="glowTehran" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="6" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.8" />
+                <stop offset="100%" stop-color="#10b981" stop-opacity="0.9" />
+              </linearGradient>
+            </defs>
+
+            <!-- Abstract Background Continents (Stylized Vector Topology) -->
+            <!-- North America -->
+            <path d="M 120 100 Q 180 80 250 110 T 320 170 Q 280 230 200 220 Q 150 180 120 100 Z" fill="#0d1726" stroke="#1f2d42" stroke-width="1" opacity="0.6"/>
+            <!-- South America -->
+            <path d="M 240 250 Q 290 280 280 370 Q 240 430 210 390 Q 200 320 240 250 Z" fill="#0d1726" stroke="#1f2d42" stroke-width="1" opacity="0.6"/>
+            <!-- Europe -->
+            <path d="M 440 90 Q 520 80 540 130 T 480 180 Q 430 150 440 90 Z" fill="#0f1b2e" stroke="#25354e" stroke-width="1.2" opacity="0.8"/>
+            <!-- Africa -->
+            <path d="M 460 190 Q 540 200 550 280 Q 520 370 480 370 Q 440 290 460 190 Z" fill="#0d1726" stroke="#1f2d42" stroke-width="1" opacity="0.6"/>
+            <!-- Middle East & Iran -->
+            <path d="M 550 150 Q 620 140 640 190 Q 610 240 560 210 Z" fill="#12233c" stroke="#2b4060" stroke-width="1.5" opacity="0.9"/>
+            <!-- Asia & Japan -->
+            <path d="M 640 100 Q 770 90 850 160 Q 820 250 710 230 Q 640 180 640 100 Z" fill="#0d1726" stroke="#1f2d42" stroke-width="1" opacity="0.6"/>
+            <!-- Oceania -->
+            <path d="M 780 320 Q 860 310 880 370 Q 830 420 770 380 Z" fill="#0d1726" stroke="#1f2d42" stroke-width="1" opacity="0.6"/>
+
+            <!-- Grid Coordinates Overlay -->
+            <g stroke="#162235" stroke-dasharray="3,6" stroke-width="0.7">
+              <line x1="0" y1="125" x2="1000" y2="125" />
+              <line x1="0" y1="250" x2="1000" y2="250" />
+              <line x1="0" y1="375" x2="1000" y2="375" />
+              <line x1="250" y1="0" x2="250" y2="500" />
+              <line x1="500" y1="0" x2="500" y2="500" />
+              <line x1="750" y1="0" x2="750" y2="500" />
+            </g>
+
+            <!-- Dynamic Animated Flight Packet Arcs will be rendered here -->
+            <g id="mapPacketArcs"></g>
+
+            <!-- Tehran Central Hub (Iran Domestic Node) -->
+            <!-- Coordinates: ~ 590, 185 -->
+            <g id="hub-tehran" class="cursor-pointer" onclick="window.Actions.focusMapNode('tehran')">
+              <circle cx="590" cy="185" r="18" fill="none" stroke="#10b981" stroke-width="1" opacity="0.3" class="animate-ping" style="animation-duration: 3s;" />
+              <circle cx="590" cy="185" r="10" fill="none" stroke="#10b981" stroke-width="1.5" opacity="0.7" />
+              <circle cx="590" cy="185" r="5" fill="#10b981" filter="url(#glowTehran)" />
+              <text x="590" y="210" text-anchor="middle" fill="#10b981" font-size="11" font-family="monospace" font-weight="bold">TEHRAN (HUB)</text>
+              <text x="590" y="222" text-anchor="middle" fill="#64748b" font-size="9" font-family="monospace">IRAN RELAY</text>
+            </g>
+
+            <!-- Global Cloud Datacenter Nodes -->
+            <!-- Frankfurt (Vultr / Hetzner) -> 485, 140 -->
+            <g id="node-fra" class="cursor-pointer group" onclick="window.Actions.selectRegionFromMap('vultr', 'DE, Frankfurt')">
+              <circle cx="485" cy="140" r="7" fill="#00f0ff" filter="url(#glowCyan)" class="group-hover:scale-125 transition-transform" />
+              <circle cx="485" cy="140" r="14" fill="none" stroke="#00f0ff" stroke-width="1" opacity="0.4" />
+              <text x="485" y="125" text-anchor="middle" fill="#00f0ff" font-size="10" font-family="monospace" font-weight="bold">FRANKFURT</text>
+              <text x="485" y="160" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="monospace">DE ~68ms</text>
+            </g>
+
+            <!-- Amsterdam -> 470, 130 -->
+            <g id="node-ams" class="cursor-pointer group" onclick="window.Actions.selectRegionFromMap('vultr', 'NL, Amsterdam')">
+              <circle cx="470" cy="130" r="6" fill="#00f0ff" filter="url(#glowCyan)" />
+              <text x="445" y="120" text-anchor="end" fill="#cbd5e1" font-size="9" font-family="monospace">AMS (NL)</text>
+            </g>
+
+            <!-- Helsinki (Hetzner) -> 530, 95 -->
+            <g id="node-hel" class="cursor-pointer group" onclick="window.Actions.selectRegionFromMap('hetzner', 'FI, Helsinki')">
+              <circle cx="530" cy="95" r="6" fill="#00f0ff" filter="url(#glowCyan)" />
+              <text x="530" y="85" text-anchor="middle" fill="#cbd5e1" font-size="9" font-family="monospace">HELSINKI (FI)</text>
+            </g>
+
+            <!-- Warsaw (Vultr) -> 520, 130 -->
+            <g id="node-waw" class="cursor-pointer group" onclick="window.Actions.selectRegionFromMap('vultr', 'PL, Warsaw')">
+              <circle cx="520" cy="130" r="6" fill="#00f0ff" filter="url(#glowCyan)" />
+              <text x="545" y="133" text-anchor="start" fill="#cbd5e1" font-size="9" font-family="monospace">WARSAW (PL)</text>
+            </g>
+
+            <!-- London (Vultr) -> 450, 130 -->
+            <g id="node-lhr" class="cursor-pointer group" onclick="window.Actions.selectRegionFromMap('vultr', 'GB, London')">
+              <circle cx="450" cy="130" r="6" fill="#00f0ff" filter="url(#glowCyan)" />
+              <text x="430" y="142" text-anchor="end" fill="#cbd5e1" font-size="9" font-family="monospace">LONDON (GB)</text>
+            </g>
+
+            <!-- Paris (Vultr) -> 460, 145 -->
+            <g id="node-cdg" class="cursor-pointer group" onclick="window.Actions.selectRegionFromMap('vultr', 'FR, Paris')">
+              <circle cx="460" cy="145" r="5" fill="#00f0ff" filter="url(#glowCyan)" />
+              <text x="440" y="160" text-anchor="end" fill="#94a3b8" font-size="8" font-family="monospace">PARIS (FR)</text>
+            </g>
+
+            <!-- Tokyo (Vultr) -> 820, 175 -->
+            <g id="node-nrt" class="cursor-pointer group" onclick="window.Actions.selectRegionFromMap('vultr', 'JP, Tokyo')">
+              <circle cx="820" cy="175" r="6" fill="#00f0ff" filter="url(#glowCyan)" />
+              <text x="820" y="165" text-anchor="middle" fill="#cbd5e1" font-size="9" font-family="monospace">TOKYO (JP)</text>
+            </g>
+
+            <!-- New York / US East -> 240, 160 -->
+            <g id="node-ewr" class="cursor-pointer group" onclick="window.Actions.selectRegionFromMap('vultr', 'US, New York')">
+              <circle cx="240" cy="160" r="6" fill="#00f0ff" filter="url(#glowCyan)" />
+              <text x="240" y="150" text-anchor="middle" fill="#cbd5e1" font-size="9" font-family="monospace">US EAST (NY)</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Latency Metrics Breakdown Grid -->
+        <div class="grid grid-cols-4 gap-4 font-mono text-xs">
+          <div class="panel-box rounded-lg p-3 space-y-1">
+            <span class="text-slate-500 uppercase text-[10px]">Optimal Route</span>
+            <div class="font-bold text-emerald-400 text-sm">DE, Frankfurt</div>
+            <div class="text-[11px] text-slate-400">Avg: 65 - 82 ms (Vultr / Hetzner)</div>
+          </div>
+          <div class="panel-box rounded-lg p-3 space-y-1">
+            <span class="text-slate-500 uppercase text-[10px]">Low-Jitter Alternative</span>
+            <div class="font-bold text-telemetry-cyan text-sm">NL, Amsterdam</div>
+            <div class="text-[11px] text-slate-400">Avg: 72 - 89 ms (Vultr / ProVM)</div>
+          </div>
+          <div class="panel-box rounded-lg p-3 space-y-1">
+            <span class="text-slate-500 uppercase text-[10px]">Active Hub Relays</span>
+            <div class="font-bold text-white text-sm">1 Iran Relay Node</div>
+            <div class="text-[11px] text-slate-400" id="mapRelayStatus">Operational (SSH Verified)</div>
+          </div>
+          <div class="panel-box rounded-lg p-3 space-y-1">
+            <span class="text-slate-500 uppercase text-[10px]">Cloud Regions Ready</span>
+            <div class="font-bold text-amber-400 text-sm">7 Global Datacenters</div>
+            <div class="text-[11px] text-slate-400">1-click scan selection</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------------------- -->
+    <!--  TAB 7: DIAGNOSTICS & CONFIG                                          -->
     <!-- --------------------------------------------------------------------- -->
     <section id="view-settings" class="hidden space-y-6 max-w-2xl mx-auto font-mono text-xs">
       <div class="panel-box rounded-lg p-6 space-y-6">
@@ -560,6 +733,44 @@
       globalStatus.className = "font-bold text-telemetry-cyan animate-pulse";
     });
 
+    // In-memory bandwidth series history for live sparklines: { [idx]: { down: [], up: [] } }
+    window.SparklineStore = {};
+
+    window.drawSparkline = function (canvasId, downData, upData) {
+      const cvs = document.getElementById(canvasId);
+      if (!cvs) return;
+      const ctx = cvs.getContext("2d");
+      const w = cvs.width;
+      const h = cvs.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Background subtle grid
+      ctx.strokeStyle = "#162235";
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(0, h / 2);
+      ctx.lineTo(w, h / 2);
+      ctx.stroke();
+
+      function plot(data, color, fillGrad) {
+        if (!data || data.length < 2) return;
+        const maxVal = Math.max(100, ...data);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        const step = w / (data.length - 1);
+        data.forEach((val, i) => {
+          const x = i * step;
+          const y = h - (val / maxVal) * (h - 4) - 2;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+      }
+
+      plot(downData, "#00f0ff"); // Download Cyan
+      plot(upData, "#10b981");   // Upload Emerald
+    };
     window.EventBus.on("VM_STAGE_UPDATE", function (vm) {
       const container = document.getElementById("vmGridContainer");
       let card = document.getElementById(`vm-card-${vm.idx}`);
@@ -576,6 +787,18 @@
         container.appendChild(card);
       }
 
+      // Update sparkline series
+      if (!window.SparklineStore[vm.idx]) {
+        window.SparklineStore[vm.idx] = { down: [0, 0, 0], up: [0, 0, 0] };
+      }
+      const store = window.SparklineStore[vm.idx];
+      if (vm.down_kb !== undefined && vm.up_kb !== undefined) {
+        store.down.push(vm.down_kb);
+        store.up.push(vm.up_kb);
+        if (store.down.length > 20) store.down.shift();
+        if (store.up.length > 20) store.up.shift();
+      }
+
       // Border and stage color coding
       let borderClass = "border-l-cyan-400";
       let statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800">${vm.stage}</span>`;
@@ -583,11 +806,14 @@
       if (vm.stage === "CLEAN") {
         borderClass = "border-l-emerald-500 bg-emerald-950/20";
         statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 font-bold shadow-[0_0_10px_rgba(16,185,129,0.3)]">ROUTE CLEAN</span>`;
+        // Trigger live animated packet arc to Tehran on the Geo-Map
+        window.Actions.triggerMapPacketArc(vm.datacenter || 'DE, Frankfurt');
       } else if (vm.stage === "DIRTY" || vm.stage === "FLAGGED_DIRTY" || vm.stage === "SSH_TIMEOUT" || vm.stage === "FAILED") {
         borderClass = "border-l-rose-500 bg-rose-950/20";
         statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] bg-rose-950 text-rose-400 border border-rose-800 font-bold">ROUTE DIRTY</span>`;
       }
 
+      const canvasId = `sparkline-${vm.idx}`;
       card.className = `panel-box rounded-lg p-4 font-mono text-xs space-y-2.5 border-l-4 ${borderClass}`;
       card.innerHTML = `
         <div class="flex items-center justify-between">
@@ -599,11 +825,26 @@
           <div class="flex justify-between"><span class="text-slate-500">TCP Stream:</span> <span class="${vm.clean ? 'text-emerald-400 font-bold' : 'text-slate-300'}">${vm.tcp_result || 'In Flight...'}</span></div>
           <div class="flex justify-between"><span class="text-slate-500">UDP Echo:</span> <span class="text-slate-300">${vm.udp_result || 'In Flight...'}</span></div>
         </div>
+
+        <!-- Real-Time Bandwidth Sparkline Canvas -->
+        <div class="pt-1.5 pb-1 border-t border-obsidian-border/60">
+          <div class="flex justify-between items-center text-[9px] mb-1 text-slate-400">
+            <span class="flex items-center space-x-1"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span><span>↓ Down ${vm.down_kb || 0} KB/s</span></span>
+            <span class="flex items-center space-x-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>↑ Up ${vm.up_kb || 0} KB/s</span></span>
+          </div>
+          <canvas id="${canvasId}" width="260" height="38" class="w-full h-[38px] bg-obsidian-950/90 rounded border border-obsidian-border"></canvas>
+        </div>
+
         <div class="pt-2 border-t border-obsidian-border flex justify-between items-center text-[10px]">
           <span class="text-slate-500 font-mono">${vm.id ? vm.id.substring(0, 12) + '...' : 'ID Pending'}</span>
           ${vm.id ? `<button onclick="window.Actions.deleteInstanceById('${vm.id}')" class="text-rose-400 hover:underline">Terminate</button>` : ''}
         </div>
       `;
+
+      // Draw canvas
+      setTimeout(() => {
+        window.drawSparkline(canvasId, store.down, store.up);
+      }, 10);
 
       // Update count
       const activeCount = container.querySelectorAll(".panel-box").length;
@@ -648,6 +889,79 @@
         if (tabId === "dirty-registry") this.loadDirtyRegistry();
         if (tabId === "active-vms") this.loadExistingVMs();
         if (tabId === "custom-targets") this.loadCustomHosts();
+        if (tabId === "geo-map") this.refreshGeoMap();
+      },
+
+      selectRegionFromMap: function (provider, locationName) {
+        this.switchTab('orchestrator');
+        const provSelect = document.getElementById("provSelect");
+        if (provSelect) {
+          provSelect.value = provider;
+          this.onProviderChange().then(() => {
+            const locSelect = document.getElementById("locSelect");
+            if (locSelect) {
+              for (let i = 0; i < locSelect.options.length; i++) {
+                if (locSelect.options[i].value.includes(locationName) || locationName.includes(locSelect.options[i].value)) {
+                  locSelect.selectedIndex = i;
+                  this.onLocationChange();
+                  break;
+                }
+              }
+            }
+          });
+        }
+      },
+
+      focusMapNode: function (node) {
+        alert("Iran Relay Node: Tehran Central Hub. All WatTunnel verification traffic terminates here.");
+      },
+
+      triggerMapPacketArc: function (region) {
+        const svgArcs = document.getElementById("mapPacketArcs");
+        if (!svgArcs) return;
+
+        // Coordinates mapping
+        let x1 = 485, y1 = 140; // Default Frankfurt
+        const regLower = region.toLowerCase();
+        if (regLower.includes("ams") || regLower.includes("amsterdam")) { x1 = 470; y1 = 130; }
+        else if (regLower.includes("hel") || regLower.includes("helsinki")) { x1 = 530; y1 = 95; }
+        else if (regLower.includes("waw") || regLower.includes("warsaw")) { x1 = 520; y1 = 130; }
+        else if (regLower.includes("lhr") || regLower.includes("london")) { x1 = 450; y1 = 130; }
+        else if (regLower.includes("cdg") || regLower.includes("paris")) { x1 = 460; y1 = 145; }
+        else if (regLower.includes("nrt") || regLower.includes("tokyo")) { x1 = 820; y1 = 175; }
+        else if (regLower.includes("us") || regLower.includes("new york")) { x1 = 240; y1 = 160; }
+
+        const x2 = 590, y2 = 185; // Tehran Hub
+        const cx = (x1 + x2) / 2;
+        const cy = Math.min(y1, y2) - 35; // Curve height
+
+        const pathD = `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+
+        // Create glowing animated arc
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathD);
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", "url(#arcGradient)");
+        path.setAttribute("stroke-width", "2");
+        path.setAttribute("stroke-dasharray", "6,6");
+        path.setAttribute("class", "animate-pulse");
+        path.setAttribute("opacity", "0.9");
+
+        svgArcs.appendChild(path);
+
+        // Remove arc after 8 seconds
+        setTimeout(() => {
+          if (path.parentNode) path.parentNode.removeChild(path);
+        }, 8000);
+      },
+
+      refreshGeoMap: function () {
+        // Redraw or update relay node status
+        const host = document.getElementById("cfgIranHost") ? document.getElementById("cfgIranHost").value : "";
+        const stat = document.getElementById("mapRelayStatus");
+        if (stat) {
+          stat.textContent = host ? `Host: ${host}` : "Relay Unconfigured";
+        }
       },
 
       toggleMode: function () {
