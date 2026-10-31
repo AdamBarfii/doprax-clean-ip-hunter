@@ -23,3 +23,8 @@ env/
 Thumbs.db
 github_upload_ready/
 
+# PyInstaller build artifacts
+build/
+dist/
+*.spec
+

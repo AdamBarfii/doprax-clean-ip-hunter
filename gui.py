@@ -654,9 +654,21 @@ class ObservabilityAPI:
         return result
 
 
+def get_resource_path(relative_path: str) -> str:
+    """Get absolute path to resource, works for dev and for PyInstaller bundle."""
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
+
+
 def main():
+    # If running from a bundled executable, switch working directory to executable folder
+    # so config.json and server databases stay adjacent to the .exe
+    if getattr(sys, 'frozen', False):
+        os.chdir(os.path.dirname(sys.executable))
+
     api = ObservabilityAPI()
-    html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard.html")
+    html_path = get_resource_path("dashboard.html")
 
     window = webview.create_window(
         title="AetherProbe Industrial Observability Suite",

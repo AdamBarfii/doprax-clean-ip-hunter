@@ -168,7 +168,9 @@ cp config.example.json config.json
 ```
 
 ### 3. Launch AetherProbe
-- **Modern Desktop GUI (Recommended)**: Double-click [`start_gui.bat`](start_gui.bat) or run:
+- **Standalone Portable Windows .EXE (No Python Needed)**:
+  Download **[`AetherProbe-GUI.exe`](https://github.com/AdamBarfii/doprax-clean-ip-hunter/releases/latest)** directly from Releases and double-click to run.
+- **Modern Desktop GUI (From Source)**: Double-click [`start_gui.bat`](start_gui.bat) or run:
   ```powershell
   python gui.py
   ```
